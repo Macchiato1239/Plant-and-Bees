@@ -99,7 +99,6 @@ class Game:
 
 
     def create_rect(self, x1, y1, x2, y2, fill="red"):
-
         rect=Rect(self.__canva, x1, y1, x2, y2, fill)
         return rect
 
@@ -111,7 +110,7 @@ class Game:
             i_x2=i.rect.x2
             i_y1=i.rect.y1
             i_y2=i.rect.y2
-            
+            ''' Checking for UI '''
             if i_x1<x<i_x2 and i_y1<y<i_y2:
                 if isinstance(i, hotbar.Slot):
                     if i.tower!=None:
@@ -120,6 +119,21 @@ class Game:
                         return True
                     else:
                         print("empty slot")
+        '''Checking if the space has been taken'''
+        for i in self.__taken:
+            i_x1=i.x1
+            i_x2=i.x2
+            i_y1=i.y1
+            i_y2=i.y2
+
+            if i_x1<x<i_x2 and i_y1<y<i_y2:
+                print("Space already taken")
+                return False
+        if self.__current_tower!=None:
+            self.place_tower(x,y)
+            print("Tower placed")
+            self.__current_tower=None
+
 
 
 
@@ -158,8 +172,19 @@ class Game:
             print("Selection released", self.__current_tower)
 
 
-        
-            
+    def place_tower(self,center_x,center_y):
+        rad=self.__current_tower.size
+        x1=center_x-rad
+        x2=center_x+rad
+        y1=center_y-rad
+        y2=center_y+rad
+        color=self.__current_tower.color
+        rect=self.create_rect(x1,y1,x2,y2,color)
+        self.__taken.append(rect)
+        '''
+        Check if the cord clicked is inside any of the taken area
+        if yes, print cant place and do not place
+        else place it down and append the cord to the space taken list'''
         #we have selected_tower list, should associate it with the slots, slot with equipped tower is a different color
         #For placing down towers, get the coord --> cord is the center of the tower-->half length, put the taken cord into a list
             

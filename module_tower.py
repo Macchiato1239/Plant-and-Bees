@@ -1,9 +1,11 @@
 from rect import Rect
 class Tower:
-    def __init__(self, name, cost, color):
+    def __init__(self, name, cost, color, size=20):
         self.__name=name
         self.__cost=cost
         self.__color=color
+        self.__size=size 
+        '''Size is half the square radius'''
 
     @property
     def name(self):
@@ -17,6 +19,9 @@ class Tower:
     def color(self):
         return self.__color
 
+    @property
+    def size(self):
+        return self.__size
 
 # from rect import Rect
 # class Tower():
