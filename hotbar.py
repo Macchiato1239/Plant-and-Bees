@@ -1,13 +1,11 @@
 from rect import Rect
-import tower
-from element import elements
+import module_tower
 
 class Slot():
     def __init__(self, rect, tower=None):
         self.__rect=rect #For the UI detection
         self.__tower=tower
-        elements.add_element(self)
-
+    #if tower=None, uninteractable
     @property
     def rect(self):
         return self.__rect
@@ -15,6 +13,12 @@ class Slot():
     @property
     def tower(self):
         return self.__tower
+
+    @tower.setter
+    def tower(self, value):
+        if isinstance(value, module_tower.Tower):
+            self.__tower=value
+
 
 
 
