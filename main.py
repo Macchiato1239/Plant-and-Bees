@@ -35,6 +35,7 @@ class Game:
         self.__max_towers=5
 
         self.__current_tower=None
+        self.__current_tower_signal=self.create_rect(0, 0, 30, 30, "red")
 
 
 
@@ -75,6 +76,10 @@ class Game:
                 self.__hotbar[key].rect.change_color(self.__empty_slot_color)
             else:
                 self.__hotbar[key].rect.change_color(self.__filled_slot_color)
+        if self.__current_tower==None:
+            self.__current_tower_signal.change_color("red")
+        else:
+            self.__current_tower_signal.change_color("green")
 
         # Game logic goes here
 
@@ -120,21 +125,16 @@ class Game:
                     else:
                         print("empty slot")
         '''Checking if the space has been taken'''
-        for i in self.__taken:
-            i_x1=i.x1
-            i_x2=i.x2
-            i_y1=i.y1
-            i_y2=i.y2
-
-            if i_x1<x<i_x2 and i_y1<y<i_y2:
-                print("Space already taken")
-                return False
+        if self.compare_cord_rect(x,y, self.__taken):
+            print("Space already taken")
+            return False
         if self.__current_tower!=None:
-            self.place_tower(x,y)
+            result=self.place_tower(x,y)
+            if result==False:
+                print("Failed")
+                return
             print("Tower placed")
             self.__current_tower=None
-
-
 
 
 
@@ -175,16 +175,42 @@ class Game:
     def place_tower(self,center_x,center_y):
         rad=self.__current_tower.size
         x1=center_x-rad
-        x2=center_x+rad
         y1=center_y-rad
+        x2=center_x+rad
         y2=center_y+rad
+        x3=x2
+        y3=y1
+        x4=x1
+        y4=y2
+        if self.compare_cord_rect(x1, y1, self.__taken) or self.compare_cord_rect(x2, y2, self.__taken) or self.compare_cord_rect(x3,y3, self.__taken) or self.compare_cord_rect(x4,y4,self.__taken):
+            print("Tung")
+            return False
         color=self.__current_tower.color
         rect=self.create_rect(x1,y1,x2,y2,color)
         self.__taken.append(rect)
+        return True
+         #check if the rect collide with the others
         '''
         Check if the cord clicked is inside any of the taken area
         if yes, print cant place and do not place
-        else place it down and append the cord to the space taken list'''
+        else place it down and append the cord to the space taken list
+        '''
+    def compare_cord_rect(self, cord_x, cord_y, rect_list):
+        for i in rect_list:
+            i_x1=i.x1
+            i_x2=i.x2
+            i_y1=i.y1
+            i_y2=i.y2
+            print(len(rect_list))
+
+            if i_x1<cord_x<i_x2 and i_y1<cord_y<i_y2:
+                print(f"True: {cord_x}, {cord_y}, {i_x1}, {i_x2}, {i_y1}, {i_y2}")
+                return True 
+                '''Collide '''
+            else:
+                print(f"False: {cord_x}, {cord_y}, {i_x1}, {i_x2}, {i_y1}, {i_y2}")
+        return False
+
         #we have selected_tower list, should associate it with the slots, slot with equipped tower is a different color
         #For placing down towers, get the coord --> cord is the center of the tower-->half length, put the taken cord into a list
             
