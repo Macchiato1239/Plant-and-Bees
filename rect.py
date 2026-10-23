@@ -1,5 +1,13 @@
 from abc import ABC, abstractmethod
 import tkinter as tk
+'''
+What needs a rect
+UI
+towers
+path
+enemies
+
+'''
 class Rect():
     def __init__(self, canva, x1, y1, x2, y2, fill="red"):
         self.__x1=x1

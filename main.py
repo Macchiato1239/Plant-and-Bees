@@ -2,6 +2,7 @@ import tkinter as tk
 from rect import Rect
 import hotbar
 import module_tower
+import enemy
 class Game:
     def __init__(self):
         '''Window property'''
@@ -18,6 +19,10 @@ class Game:
             height=self.__window_height,
             bg=self.__bg_color
         )
+
+        self.__base_health=100
+
+
 
         '''Hot Bar Properties'''
         self.__hotbar_slot_x1=50
@@ -36,9 +41,6 @@ class Game:
 
         self.__current_tower=None
         self.__current_tower_signal=self.create_rect(0, 0, 30, 30, "red")
-
-
-
         
     def create_game_loop(self):
         self.__window.geometry(

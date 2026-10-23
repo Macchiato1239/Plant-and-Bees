@@ -1,15 +1,13 @@
 from rect import Rect
 import module_tower
+from interactable import Interactable
 
-class Slot():
+class Slot(Interactable):
     def __init__(self, rect, tower=None):
-        self.__rect=rect #For the UI detection
+        super().__init__(rect)
         self.__tower=tower
     #if tower=None, uninteractable
-    @property
-    def rect(self):
-        return self.__rect
-
+    
     @property
     def tower(self):
         return self.__tower

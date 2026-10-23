@@ -1,5 +1,6 @@
 from rect import Rect
-class Tower:
+from interactable import Interactable
+class Tower():
     def __init__(self, name, cost, color, size=30):
         self.__name=name
         self.__cost=cost
