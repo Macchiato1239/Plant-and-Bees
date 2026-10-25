@@ -30,7 +30,6 @@ class Game:
         self.__spawn is a collection of coordinate for enemy to spawn in, one by one, never many at once
         For i in self.__spawn:
             With the cord of the spawn, we can spawn enemy in the middle of the spawn's rect
-            
         '''
 
 
@@ -70,7 +69,7 @@ class Game:
         soldier=self.create_tower("soldier", 200, "red")
         self.equip_tower(freezer)
         self.equip_tower(soldier)
-        # zombie=enemy.Enemy(100, 10, "green")
+        zombie=enemy.Enemy(self.__canva, 100, 10, "green")
 
 
         
@@ -117,8 +116,8 @@ class Game:
         return event.x, event.y
 
 
-    def create_rect(self, x1, y1, x2, y2, fill="red"):
-        rect=Rect(self.__canva, x1, y1, x2, y2, fill)
+    def create_rect(self, x1, y1, width, height, fill="red"):
+        rect=Rect(self.__canva, x1, y1, width, height, fill)
         return rect
 
 
@@ -126,11 +125,11 @@ class Game:
         x,y=self.get_click_cord(event)
         for i in self.__interactive:
             i_x1=i.rect.x1
-            i_x2=i.rect.x2
+            i_width=i.rect.width
             i_y1=i.rect.y1
-            i_y2=i.rect.y2
+            i_height=i.rect.height
             ''' Checking for UI '''
-            if i_x1<x<i_x2 and i_y1<y<i_y2:
+            if i_x1<x<i_x1+i_width and i_y1<y<i_y1+i_height:
                 if isinstance(i, hotbar.Slot):
                     if i.tower!=None:
                         print(f"Hotbar's slot clicked, it's a {i.tower.name}")
@@ -155,7 +154,7 @@ class Game:
     def create_hotbar_slot(self, num, color="black", selected_tower=None):
         hotbar_slot=hotbar.Slot(self.create_rect(self.__hotbar_slot_x1+(self.__hotbar_slot_width+50)*(num-1),
                                     self.__hotbar_slot_y1,
-                                    self.__hotbar_slot_x1+(self.__hotbar_slot_width+50)*(num-1)+self.__hotbar_slot_width,
+                                    self.__hotbar_slot_width,
                                     self.__hotbar_slot_height,
                                     color),
                                     tower=selected_tower
@@ -203,7 +202,7 @@ class Game:
         if self.compare_cord_rect(x1, y1, self.__taken) or self.compare_cord_rect(x2, y2, self.__taken) or self.compare_cord_rect(x3,y3, self.__taken) or self.compare_cord_rect(x4,y4,self.__taken):
             return False
         color=self.__current_tower.color
-        rect=self.create_rect(x1,y1,x2,y2,color)
+        rect=self.create_rect(x1,y1,rad*2,rad*2,color)
         self.__money-=self.__current_tower.cost
         self.__taken.append(rect)
         print(self.__money)
@@ -217,23 +216,22 @@ class Game:
     def compare_cord_rect(self, cord_x, cord_y, rect_list):
         for i in rect_list:
             i_x1=i.x1
-            i_x2=i.x2
+            i_width=i.width
             i_y1=i.y1
-            i_y2=i.y2
+            i_height=i.height
             print(len(rect_list))
 
-            if i_x1<cord_x<i_x2 and i_y1<cord_y<i_y2:
-                print(f"True: {cord_x}, {cord_y}, {i_x1}, {i_x2}, {i_y1}, {i_y2}")
-                return True 
-                '''Collide '''
-            else:
-                print(f"False: {cord_x}, {cord_y}, {i_x1}, {i_x2}, {i_y1}, {i_y2}")
+            if i_x1<cord_x<i_x1+i_width and i_y1<cord_y<i_y1+i_height:
+                return True
         return False
 
         #we have selected_tower list, should associate it with the slots, slot with equipped tower is a different color
         #For placing down towers, get the coord --> cord is the center of the tower-->half length, put the taken cord into a list
             
-            
+    def activate_enemy(self, inactive_enemy):
+        if isinstance(inactive_enemy, enemy.Enemy):
+            self.__active_enemies.append(inactive_enemy)
+
     
 game = Game()
 game.create_game_loop()

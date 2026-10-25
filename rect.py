@@ -2,11 +2,11 @@ from abc import ABC, abstractmethod
 import tkinter as tk
 
 class Rect():
-    def __init__(self, canva, x1, y1, x2, y2, fill="red"):
+    def __init__(self, canva, x1, y1, width, height, fill="red"):
         self.__x1=x1
-        self.__x2=x2
+        self.__x2=x1+width
         self.__y1=y1
-        self.__y2=y2
+        self.__y2=y1+height
         self.__fill=fill
         self.__canva=canva
         self.__rect_id=canva.create_rectangle(self.__x1, self.__y1, self.__x2, self.__y2, fill=self.__fill)
@@ -34,12 +34,12 @@ class Rect():
             self.__x1=value
 
     @property
-    def x2(self):
-        return self.__x2
-    @x2.setter
-    def x2(self,value):
+    def width(self):
+        return self.__x2-self.__x1
+    @width.setter
+    def width(self,value):
         if isinstance(value, int):
-            self.__x2=value
+            self.__x2=self.__x1+value
 
     @property
     def y1(self):
@@ -50,14 +50,20 @@ class Rect():
             self.__y1=value
 
     @property
-    def y2(self):
-        return self.__y2
-    @y2.setter
-    def y2(self,value):
+    def height(self):
+        return self.__y2-self.__y1
+    @height.setter
+    def height(self,value):
         if isinstance(value, int):
-            self.__y2=value
+            self.__y2=self.__y1+value
 
     @property
     def fill(self):
         return self.__fill
+    @fill.setter
+    def fill(self, value):
+        if isinstance(value, str):
+            self.__fill=value
+        
+
 

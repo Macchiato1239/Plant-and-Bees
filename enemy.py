@@ -2,10 +2,10 @@ from rect import Rect
 from interactable import Interactable
 from abc import ABC, abstractmethod
 class Enemy(Interactable):
-    def __init__(self, health, speed, color): 
+    def __init__(self, canva, health, speed, color): 
         '''add armor, buff later
         health = damage'''
-        super().__init__(Rect(0, 200, 30, 230, color))
+        super().__init__(Rect(canva, 0, 200, 40, 40, color))
         self.__health=health
         self.__speed=speed
 
