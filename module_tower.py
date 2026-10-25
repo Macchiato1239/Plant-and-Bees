@@ -1,12 +1,16 @@
 from rect import Rect
 from interactable import Interactable
-class Tower():
-    def __init__(self, name, cost, color, size=30):
+'''
+Tower_Card contains the information about the default stats and abilities of the tower'''
+class Tower_Card():
+    def __init__(self, name, cost, color, damage, fire_rate, act_range, size=30):
         self.__name=name
         self.__cost=cost
         self.__color=color
+        self.__damage=damage
+        self.__fire_rate=fire_rate
+        self.__act_range=act_range
         self.__size=size 
-        '''Size is half the square radius'''
 
     @property
     def name(self):
@@ -15,6 +19,10 @@ class Tower():
     @property
     def cost(self):
         return self.__cost
+    @cost.setter
+    def cost(self, value):
+        if isinstance(value, int) and value>0:
+            self.__cost=value
 
     @property
     def color(self):
@@ -24,77 +32,49 @@ class Tower():
     def size(self):
         return self.__size
 
-# from rect import Rect
-# class Tower():
-#     def __init__(self, cost, range_rad, occupy):
-#         super().__init__()
-#         self.__cost=cost
-#         self.__range=range_rad
-#         self.__occupy=occupy #space taken when placed down
-#         pass
+    @property
+    def fire_rate(self):
+        return self.__fire_rate
 
-#     @property
-#     def cost(self):
-#         return self.__cost
+    @fire_rate.setter
+    def fire_rate(self, value):
+        if value>0 and (isinstance(value, float) or isinstance(value, int)):
+            self.__fire_rate=value
 
-#     @property
-#     def range_rad(self):
-#         return self.__range_rad
+    @property
+    def act_range(self):
+        return self.__act_range
+    @act_range.setter
+    def act_range(self, value):
+        if isinstance(value, int) or isinstance(value, float):
+            self.__act_range=value
 
-#     @property
-#     def occupy(self):
-#         return self.occupy
-
-
-# #--
-# class dps_Tower(Tower):
-#     def __init__(self, cost, range_rad, occupy, attack_rate, dmg):
-#         super().__init__(cost, range_rad, occupy)
-#         self.__attack_rate=attack_rate
-#         self.__dmg=dmg
-#         self.__occupy=occupy
-
-#     @property
-#     def attack_rate(self):
-#         return self.__attack_rate
-
-#     @property
-#     def dmg(self):
-#         return self.__dmg
-
-#     @property
-#     def occupy(self):
-#         return self.__occupy
+    @property
+    def damage(self):
+        return self.__damage
+    @damage.setter
+    def damage(self, value):
+        if isinstance(value, int):
+            self.__damage=value
 
 
-# class aoe_dps_Tower(dps_Tower):
-#     def __init__(self, cost, range_rad, occupy, attack_rate, dmg, aoe_rad):
-#         super().__init__(cost, range_rad, occupy, attack_rate, dmg)
-#         self.__aoe_rad=aoe_rad
+'''
+Tower_Manifested are the towers that are placed down, therefore a manifestation of the info card'''
+class Tower_Manifested(Tower_Card): 
+    def __init__(self, name, cost, color, damage, fire_rate, act_range, rect):
+        super().__init__(name, cost, color, damage, fire_rate, act_range)
+        self.__rect=rect
+        self.__cord_x=self.__rect.x1+self.__rect.width/2
+        self.__cord_y=self.__rect.y1+self.__rect.height/2
 
-#     @property 
-#     def aoe_rad(self):
-#         return self.__aoe_rad
+    @property
+    def rect(self):
+        return self.__rect
 
-# class single_dps_Tower(dps_Tower):
-#     def __init__(self, cost, range_rad, occupy, attack_rate, dmg):
-#         super().__init__(cost, range_rad, occupy, attack_rate, dmg)
-# #--
+    @property
+    def cord_x(self):
+        return self.__cord_x
 
-
-
-
-# class debuff_tower(Tower):
-#     pass
-
-# class support_tower(Tower):
-#     pass
-
-
-
-
-
-# class farm(Tower):
-#     def __init__(self, cost, range_rad, occupy, honey):
-#         super().__init__(cost, range_rad, occupy)
-#         self.__honey=honey
+    @property
+    def cord_y(self):
+        return self.__cord_y

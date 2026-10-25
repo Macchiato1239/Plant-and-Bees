@@ -47,6 +47,7 @@ class Game:
         '''Tower properties'''
         self.__equipped_towers=[]
         self.__max_towers=5
+        self.__towers=[]
 
         self.__current_tower=None
         self.__current_tower_signal=self.create_rect(0, 0, 30, 30, "red")
@@ -65,11 +66,12 @@ class Game:
             slot=self.create_hotbar_slot(i+1, self.__empty_slot_color)
             self.__hotbar[i]=slot
 
-        freezer=self.create_tower("freezer", 250, "blue")
-        soldier=self.create_tower("soldier", 200, "red")
+        freezer=self.create_tower_card("freezer", 250, "blue", 4, 0.5, 10)
+        soldier=self.create_tower_card("soldier", 200, "red", 5, 0.2, 10)
         self.equip_tower(freezer)
         self.equip_tower(soldier)
         zombie=enemy.Enemy(self.__canva, 100, 10, "green")
+        self.__active_enemies.append(zombie)
 
 
         
@@ -133,7 +135,7 @@ class Game:
                 if isinstance(i, hotbar.Slot):
                     if i.tower!=None:
                         print(f"Hotbar's slot clicked, it's a {i.tower.name}")
-                        self.select_tower(i.tower)
+                        self.select_tower_card(i.tower)
                         return True
                     else:
                         print("empty slot")
@@ -162,20 +164,20 @@ class Game:
         self.__interactive.append(hotbar_slot)
         return hotbar_slot
 
-    def create_tower(self, name, cost, color):
-        created_tower=module_tower.Tower(name, cost, color)
+    def create_tower_card(self, name, cost, color, damage, fire_rate, act_range):
+        created_tower=module_tower.Tower_Card(name, cost, color, damage, fire_rate, act_range)
         return created_tower
 
     def equip_tower(self, selected_tower):
-        if isinstance(selected_tower, module_tower.Tower):
+        if isinstance(selected_tower, module_tower.Tower_Card):
             self.__equipped_towers.append(selected_tower)
             if len(self.__equipped_towers)>self.__max_towers:
                 self.__equipped_towers.pop(0)
             for i,v in enumerate(self.__equipped_towers):
                 self.__hotbar[i].tower=v 
 
-    def select_tower(self, selected_tower):
-        if isinstance(selected_tower, module_tower.Tower):
+    def select_tower_card(self, selected_tower):
+        if isinstance(selected_tower, module_tower.Tower_Card):
             self.__current_tower=selected_tower
             print(f"Locked onto the tower: {self.__current_tower.name}")
 
@@ -183,6 +185,14 @@ class Game:
         if event.keysym == "x":
             self.__current_tower=None
             print("Selection released", self.__current_tower)
+
+    def create_tower(self, name, cost, color, damage, fire_rate, act_range, rect):
+        if self.__current_tower==None:
+            return
+        tower=module_tower.Tower_Manifested(name, cost, color, damage, fire_rate, act_range, rect)
+        self.__towers.append(tower) #does this create a duplicate version of tower and would it affect anything?
+        return tower
+
 
 
     def place_tower(self,center_x,center_y):
@@ -202,10 +212,18 @@ class Game:
         if self.compare_cord_rect(x1, y1, self.__taken) or self.compare_cord_rect(x2, y2, self.__taken) or self.compare_cord_rect(x3,y3, self.__taken) or self.compare_cord_rect(x4,y4,self.__taken):
             return False
         color=self.__current_tower.color
-        rect=self.create_rect(x1,y1,rad*2,rad*2,color)
+        rect=self.create_rect(x1,y1,rad*2,rad*2, color)
+        tower=self.create_tower(self.__current_tower.name,
+                                self.__current_tower.cost,
+                                color,
+                                self.__current_tower.damage,
+                                self.__current_tower.fire_rate,
+                                self.__current_tower.act_range,
+                                rect)
         self.__money-=self.__current_tower.cost
         self.__taken.append(rect)
-        print(self.__money)
+        print(f"cord_x: {tower.cord_x}, cord_y: {tower.cord_y}")
+        
         return True
          #check if the rect collide with the others
         '''
@@ -232,7 +250,6 @@ class Game:
         if isinstance(inactive_enemy, enemy.Enemy):
             self.__active_enemies.append(inactive_enemy)
 
-    
 game = Game()
 game.create_game_loop()
 
