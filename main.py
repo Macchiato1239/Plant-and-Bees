@@ -19,9 +19,19 @@ class Game:
             height=self.__window_height,
             bg=self.__bg_color
         )
-
+        '''Game play properties'''
         self.__base_health=100
-
+        self.__spawn=[]
+        self.__active_enemies=[]
+        self.__starting_money=600
+        self.__money=self.__starting_money
+        
+        '''
+        self.__spawn is a collection of coordinate for enemy to spawn in, one by one, never many at once
+        For i in self.__spawn:
+            With the cord of the spawn, we can spawn enemy in the middle of the spawn's rect
+            
+        '''
 
 
         '''Hot Bar Properties'''
@@ -56,10 +66,12 @@ class Game:
             slot=self.create_hotbar_slot(i+1, self.__empty_slot_color)
             self.__hotbar[i]=slot
 
-        freezer=self.create_tower("freezer", 10, "blue")
-        soldier=self.create_tower("soldier", 10, "red")
+        freezer=self.create_tower("freezer", 250, "blue")
+        soldier=self.create_tower("soldier", 200, "red")
         self.equip_tower(freezer)
         self.equip_tower(soldier)
+        # zombie=enemy.Enemy(100, 10, "green")
+
 
         
         self.game_loop()
@@ -175,6 +187,10 @@ class Game:
 
 
     def place_tower(self,center_x,center_y):
+        if self.__money<self.__current_tower.cost:
+            print("Not enough money")
+            self.__current_tower=None
+            return False
         rad=self.__current_tower.size
         x1=center_x-rad
         y1=center_y-rad
@@ -185,11 +201,12 @@ class Game:
         x4=x1
         y4=y2
         if self.compare_cord_rect(x1, y1, self.__taken) or self.compare_cord_rect(x2, y2, self.__taken) or self.compare_cord_rect(x3,y3, self.__taken) or self.compare_cord_rect(x4,y4,self.__taken):
-            print("Tung")
             return False
         color=self.__current_tower.color
         rect=self.create_rect(x1,y1,x2,y2,color)
+        self.__money-=self.__current_tower.cost
         self.__taken.append(rect)
+        print(self.__money)
         return True
          #check if the rect collide with the others
         '''
