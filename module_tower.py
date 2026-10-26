@@ -1,5 +1,6 @@
 from rect import Rect
 from interactable import Interactable
+import time
 '''
 Tower_Card contains the information about the default stats and abilities of the tower'''
 class Tower_Card():
@@ -64,17 +65,27 @@ class Tower_Manifested(Tower_Card):
     def __init__(self, name, cost, color, damage, fire_rate, act_range, rect):
         super().__init__(name, cost, color, damage, fire_rate, act_range)
         self.__rect=rect
-        self.__cord_x=self.__rect.x1+self.__rect.width/2
-        self.__cord_y=self.__rect.y1+self.__rect.height/2
+        self.__last_act=0
 
     @property
     def rect(self):
         return self.__rect
-
     @property
-    def cord_x(self):
-        return self.__cord_x
+    def last_act(self):
+        return self.__last_act
+    @last_act.setter
+    def last_act(self, value):
+        self.__last_act=value
 
-    @property
-    def cord_y(self):
-        return self.__cord_y
+    def cooldown_check(self):
+        current_time=time.monotonic()
+        if current_time-self.__last_act<self.__fire_rate:
+            return False
+        self.__last_act=current_time
+        '''Has already done cooling down'''
+        return True 
+    
+
+
+    def act(self):
+        pass #Start shooting

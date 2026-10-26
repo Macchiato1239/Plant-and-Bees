@@ -3,6 +3,8 @@ from rect import Rect
 import hotbar
 import module_tower
 import enemy
+import math
+import time
 class Game:
     def __init__(self):
         '''Window property'''
@@ -25,7 +27,11 @@ class Game:
         self.__active_enemies=[]
         self.__starting_money=600
         self.__money=self.__starting_money
-        
+        self.__money_display=self.__canva.create_text(
+            50,50,
+            text=f"{self.__money}",
+            font=("Arial", 24),
+            fill="black")
         '''
         self.__spawn is a collection of coordinate for enemy to spawn in, one by one, never many at once
         For i in self.__spawn:
@@ -95,6 +101,13 @@ class Game:
             self.__current_tower_signal.change_color("red")
         else:
             self.__current_tower_signal.change_color("green")
+
+
+        #Update money
+        self.__canva.itemconfig(
+            self.__money_display,
+            text=f"{self.__money}"
+        )
 
         # Game logic goes here
 
@@ -249,6 +262,24 @@ class Game:
     def activate_enemy(self, inactive_enemy):
         if isinstance(inactive_enemy, enemy.Enemy):
             self.__active_enemies.append(inactive_enemy)
+
+    def dist_cord_cord(self, rect1, rect2):
+        cord1_x=rect1.cord_x
+        cord1_y=rect1.cord_y
+        cord2_x=rect2.cord_x
+        cord2_y=rect2.cord_y
+
+        horizontal=(cord1_x-cord2_x)**2
+        vertical=(cord1_y-cord2_y)**2
+        dist=math.sqrt(horizontal+vertical)
+        return dist
+
+    def range_enemy_tower(self, enemy, tower):
+        dist=self.dist_cord_cord(enemy.rect, tower.rect)
+        if dist<=tower.act_range:
+            return True
+        return False
+
 
 game = Game()
 game.create_game_loop()
