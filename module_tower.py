@@ -84,8 +84,8 @@ class Tower_Manifested(Tower_Card):
         self.__last_act=current_time
         '''Has already done cooling down'''
         return True 
+    '''cooldown is calculated within the tower, range is checked by the game itself'''
     
-
 
     def act(self):
         pass #Start shooting

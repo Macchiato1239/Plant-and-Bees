@@ -5,6 +5,7 @@ import module_tower
 import enemy
 import math
 import time
+import build
 class Game:
     def __init__(self):
         '''Window property'''
@@ -27,6 +28,7 @@ class Game:
         self.__active_enemies=[]
         self.__starting_money=600
         self.__money=self.__starting_money
+        self.__base=build.Base()
         self.__money_display=self.__canva.create_text(
             50,50,
             text=f"{self.__money}",
@@ -108,6 +110,10 @@ class Game:
             self.__money_display,
             text=f"{self.__money}"
         )
+
+        '''
+        Towers' action
+        '''
 
         # Game logic goes here
 
@@ -235,7 +241,6 @@ class Game:
                                 rect)
         self.__money-=self.__current_tower.cost
         self.__taken.append(rect)
-        print(f"cord_x: {tower.cord_x}, cord_y: {tower.cord_y}")
         
         return True
          #check if the rect collide with the others
@@ -281,6 +286,8 @@ class Game:
         return False
 
 
+    # def condition_for_action(self, selected_tower):
+    #     if selected_tower.cooldown_check() and :
 game = Game()
 game.create_game_loop()
 
