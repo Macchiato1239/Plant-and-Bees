@@ -24,11 +24,11 @@ class Game:
         )
         '''Game play properties'''
         self.__base_health=100
-        self.__spawn=[]
+        self.__spawn=build.Spawn(self.__canva, 0, 300)
         self.__active_enemies=[]
         self.__starting_money=600
         self.__money=self.__starting_money
-        self.__base=build.Base()
+        self.__base=build.Base(self.__canva, self.__base_health, 900, 300)
         self.__money_display=self.__canva.create_text(
             50,50,
             text=f"{self.__money}",
@@ -78,10 +78,12 @@ class Game:
         soldier=self.create_tower_card("soldier", 200, "red", 5, 0.2, 10)
         self.equip_tower(freezer)
         self.equip_tower(soldier)
-        zombie=enemy.Enemy(self.__canva, 100, 10, "green")
+        zombie=self.spawn_enemy(self.__canva, 30, 30, 50, 10, "green")
         self.__active_enemies.append(zombie)
 
 
+        self.__taken.append(self.__spawn.rect)
+        self.__taken.append(self.__base.rect)
         
         self.game_loop()
         # self.create_hotbar_slot(1)
@@ -285,6 +287,12 @@ class Game:
             return True
         return False
 
+    def spawn_enemy(self, canva, width, height, health, speed, color):
+        spawn_x=self.__spawn.rect.cord_x-width/2
+        spawn_y=self.__spawn.rect.cord_y-height/2
+        spawned_enemy=enemy.Enemy(canva, spawn_x, spawn_y, health, speed, color)
+        self.__active_enemies.append(enemy)
+        return spawned_enemy
 
     # def condition_for_action(self, selected_tower):
     #     if selected_tower.cooldown_check() and :
