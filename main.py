@@ -70,12 +70,22 @@ class Game:
 
 
         '''Build properties'''
-        self.__map=[[self.__spawn.rect.cord_x, self.__spawn.rect.cord_y],
-                    [100,300],
-                    [100, 400],
-                    [350, 400],
-                    [350, 300], 
-                    [self.__base.rect.cord_x, self.__base.rect.cord_y]]
+        self.__map=[[self.__spawn.rect.cord_x, self.__spawn.rect.cord_y], 
+                    [100, 300], #+100
+                    [100, 400], #+100
+                    [350, 400], #+250
+                    [350, 300], #+100
+                    [self.__base.rect.cord_x, self.__base.rect.cord_y]] #+550
+        '''
+        if x2=x1 -> vertical -->length = abs(y2-y1)
+        if y2=y1 -> horizontal --> length = abs(x2-x1)
+        '''
+
+        self.__map_length=0
+
+
+        '''Enemies stuff'''
+        self.__closest=None #Closest to base
 
     def create_game_loop(self):
         self.__window.geometry(
@@ -99,6 +109,16 @@ class Game:
         self.__taken.append(self.__base.rect)
         self.__last_time=time.time()
 
+        '''Calculating map length'''
+        for i in range(1,len(self.__map)):
+            if self.__map[i][0]==self.__map[i-1][0]: 
+                '''x2=x1 -> horizontal -> length=abs(y2-y1)'''
+                self.__map_length+=abs(self.__map[i][1]-self.__map[i-1][1])
+                print("horizontal: ", self.__map_length)
+
+            if self.__map[i][1]==self.__map[i-1][1]: 
+                self.__map_length+=abs(self.__map[i][0]-self.__map[i-1][0])
+                print("vertical: ", self.__map_length)
 
         '''
         Path creation from self.__map
@@ -107,6 +127,10 @@ class Game:
             path=build.Path(self.__canva, self.__map[i][0], self.__map[i][1], self.__map[i+1][0], self.__map[i+1][1])
             self.__taken.append(path.rect)
         zombie=self.spawn_enemy(self.__canva, 30, 30, 50, 0.5, "green")
+
+        '''
+        Rendering base and spawn on top of all
+        '''
         self.__canva.tag_raise(self.__spawn.rect.rect_id)
         self.__canva.tag_raise(self.__base.rect.rect_id)
         self.game_loop()
