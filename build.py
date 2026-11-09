@@ -13,7 +13,7 @@ class Base(Interactable):
     def __init__(self, canva, health, x, y):
         self.__width=25
         self.__height=25
-        self.__color="red"
+        self.__color="purple"
         super().__init__(Rect(canva, x-self.__width, y-self.__width, self.__width*2, self.__height*2, self.__color))
         self.__health=health
 

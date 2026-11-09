@@ -38,7 +38,7 @@ class Game:
             fill="black")
 
         self.__health_display=self.__canva.create_text(
-            600,50,
+            500,50,
             text=f"{self.__base_health}",
             font=("Arial", 24),
             fill="red")
@@ -71,11 +71,12 @@ class Game:
 
         '''Build properties'''
         self.__map=[[self.__spawn.rect.cord_x, self.__spawn.rect.cord_y],
+                    [100,300],
                     [100, 400],
                     [350, 400],
                     [350, 300], 
                     [self.__base.rect.cord_x, self.__base.rect.cord_y]]
-        
+
     def create_game_loop(self):
         self.__window.geometry(
             f"{self.__window_width}x{self.__window_height}"
@@ -105,7 +106,9 @@ class Game:
         for i in range(len(self.__map)-1):
             path=build.Path(self.__canva, self.__map[i][0], self.__map[i][1], self.__map[i+1][0], self.__map[i+1][1])
             self.__taken.append(path.rect)
-        zombie=self.spawn_enemy(self.__canva, 30, 30, 50, 1, "green")
+        zombie=self.spawn_enemy(self.__canva, 30, 30, 50, 0.5, "green")
+        self.__canva.tag_raise(self.__spawn.rect.rect_id)
+        self.__canva.tag_raise(self.__base.rect.rect_id)
         self.game_loop()
         self.__window.mainloop()
 
@@ -157,13 +160,17 @@ class Game:
             else:
                 i.move(self.__canva, dest_x, dest_y, delta_time)
 
-        #Update money
+        '''
+        Money UI
+        '''
         self.__canva.itemconfig(
             self.__money_display,
             text=f"{self.__money}"
         )
 
-        #Update health
+        '''
+        Health UI
+        '''
         self.__canva.itemconfig(
             self.__health_display,
             text=f"{self.__base_health}"
