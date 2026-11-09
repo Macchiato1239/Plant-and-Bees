@@ -13,7 +13,7 @@ class Rect():
 
 
     def cord_overlap_check(self, x, y):
-        return (self.__x1 < x < self.__x1+self.__width and self.__y1 < y < self.__y1+self.height)
+        return (self.__x1 < x < self.__x1+self.__width and self.__y1 < y < self.__y1+self.__height)
 
 
     def change_color(self, value):
@@ -38,7 +38,7 @@ class Rect():
         return self.__x1
     @x1.setter
     def x1(self,value):
-        if isinstance(value, int):
+        if isinstance(value, (int,float)):
             self.__x1=value
 
     @property
@@ -46,7 +46,7 @@ class Rect():
         return self.__width
     @width.setter
     def width(self,value):
-        if isinstance(value, int):
+        if isinstance(value, (int,float)):
             self.__width=value
 
     @property
@@ -54,7 +54,7 @@ class Rect():
         return self.__y1
     @y1.setter
     def y1(self,value):
-        if isinstance(value, int):
+        if isinstance(value, (int,float)):
             self.__y1=value
 
     @property
@@ -62,7 +62,7 @@ class Rect():
         return self.__height
     @height.setter
     def height(self,value):
-        if isinstance(value, int):
+        if isinstance(value, (int,float)):
             self.__height=value
 
     @property

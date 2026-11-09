@@ -36,6 +36,12 @@ class Game:
             text=f"{self.__money}",
             font=("Arial", 24),
             fill="black")
+
+        self.__health_display=self.__canva.create_text(
+            600,50,
+            text=f"{self.__base_health}",
+            font=("Arial", 24),
+            fill="red")
         '''
         self.__spawn is a collection of coordinate for enemy to spawn in, one by one, never many at once
         For i in self.__spawn:
@@ -61,6 +67,14 @@ class Game:
 
         self.__current_tower=None
         self.__current_tower_signal=self.create_rect(0, 0, 30, 30, "red")
+
+
+        '''Build properties'''
+        self.__map=[[self.__spawn.rect.cord_x, self.__spawn.rect.cord_y],
+                    [100, 400],
+                    [350, 400],
+                    [350, 300], 
+                    [self.__base.rect.cord_x, self.__base.rect.cord_y]]
         
     def create_game_loop(self):
         self.__window.geometry(
@@ -69,7 +83,6 @@ class Game:
         self.__canva.pack()
         self.__window.bind("<KeyPress>", self.on_key_press)
         self.__window.bind("<KeyPress>", self.cancel_selection, add="+")
-
         self.__window.bind("<Button-1>", self.interact_with_ui)
 
         for i in range(self.__max_towers):
@@ -80,17 +93,20 @@ class Game:
         soldier=self.create_tower_card("soldier", 200, "red", 5, 0.2, 10)
         self.equip_tower(freezer)
         self.equip_tower(soldier)
-        zombie=self.spawn_enemy(self.__canva, 30, 30, 50, 1, "green")
 
-        path=build.Right_Path(self.__canva, 50, 300, 50, 850)
         self.__taken.append(self.__spawn.rect)
         self.__taken.append(self.__base.rect)
         self.__last_time=time.time()
 
+
+        '''
+        Path creation from self.__map
+        '''
+        for i in range(len(self.__map)-1):
+            path=build.Path(self.__canva, self.__map[i][0], self.__map[i][1], self.__map[i+1][0], self.__map[i+1][1])
+            self.__taken.append(path.rect)
+        zombie=self.spawn_enemy(self.__canva, 30, 30, 50, 1, "green")
         self.game_loop()
-        # self.create_hotbar_slot(1)
-        # self.create_hotbar_slot(2)
-        # self.create_hotbar_slot(3)
         self.__window.mainloop()
 
     def game_loop(self):
@@ -104,20 +120,53 @@ class Game:
                 self.__hotbar[key].rect.change_color(self.__empty_slot_color)
             else:
                 self.__hotbar[key].rect.change_color(self.__filled_slot_color)
+
         if self.__current_tower==None:
             self.__current_tower_signal.change_color("red")
         else:
             self.__current_tower_signal.change_color("green")
 
-        for i in self.__active_enemies:
-            delta_time=(self.__current_time - self.__last_time)*100
-            print(delta_time)
-            i.move_right(self.__canva, delta_time)
+        '''
+        Moving enemies'''
+        for i in self.__active_enemies[:]:
+
+            '''
+            Loop through a copy version of the list,
+            So to remove enemies if they die or reach base,
+            this is to fix skipping items in the list
+            '''
+
+
+            delta_time=(self.__current_time-self.__last_time)*100
+            cord_index=i.progress
+
+            dest_x=self.__map[cord_index][0]
+            dest_y=self.__map[cord_index][1]
+
+            if i.move(self.__canva, dest_x, dest_y, delta_time):
+                '''
+                Enemy reached a corner OR base
+                '''
+                if cord_index==len(self.__map)-1:
+                    print("End reached")
+                    self.__base_health=max(0, self.__base_health-i.health)
+                    self.__active_enemies.remove(i)
+                else:
+                    i.progress+=1
+                    i.move(self.__canva, self.__map[i.progress][0], self.__map[i.progress][1], delta_time)
+            else:
+                i.move(self.__canva, dest_x, dest_y, delta_time)
 
         #Update money
         self.__canva.itemconfig(
             self.__money_display,
             text=f"{self.__money}"
+        )
+
+        #Update health
+        self.__canva.itemconfig(
+            self.__health_display,
+            text=f"{self.__base_health}"
         )
 
         '''
@@ -269,9 +318,6 @@ class Game:
             if i_x1<cord_x<i_x1+i_width and i_y1<cord_y<i_y1+i_height:
                 return True
         return False
-
-        #we have selected_tower list, should associate it with the slots, slot with equipped tower is a different color
-        #For placing down towers, get the coord --> cord is the center of the tower-->half length, put the taken cord into a list
 
     def dist_cord_cord(self, rect1, rect2):
         cord1_x=rect1.cord_x
