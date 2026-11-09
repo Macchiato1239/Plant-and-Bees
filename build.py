@@ -29,9 +29,9 @@ class Base(Interactable):
     def game_end_lost(self):
         if self.__health==0:
             print("Game ended")
-class Path(Interactable, ABC):
-    def __init__(self, travel):
-        self.__width=50
+class Path(ABC):
+    def __init__(self, travel, width):
+        self.__width=width
         self.__travel=travel
 
     @property
@@ -45,29 +45,41 @@ class Path(Interactable, ABC):
     @property
     def middle(self):
         return self.__width/2
-class Horizontal_Path(Path):
-    def __init__(self, travel):
-        super().__init__(travel)
+    '''
+    For horizontal
+    Width=Height
+    Travel=Width'''
+class Horizontal_Path(Path, Interactable): 
+    def __init__(self, canva, x1, y1, width, travel):
+        Path.__init__(self, travel, width)
+        Interactable.__init__(self, Rect(canva, x1, y1, travel, width, "grey"))
+        
 
 class Right_Path(Horizontal_Path):
-    def __init__(self, travel):
-        super().__init__(travel)
+    def __init__(self, canva, x1, y1, width, travel):
+        super().__init__(canva, x1, y1, width, travel)
 
 class Left_Path(Horizontal_Path):
-    def __init__(self, travel):
-        super().__init__(travel)
+    def __init__(self, canva, x1, y1, width, travel):
+        super().__init__(canva, x1, y1, width, travel)
 
-class Vertical_Path(Path):
-    def __init__(self, travel):
-        super().__init__(travel)
+    '''
+    For vertical
+    Width=Width
+    Travel=Height
+    '''
+class Vertical_Path(Path, Interactable):
+    def __init__(self, canva, x1, y1, width, travel):
+        Path.__init__(self, travel, width)
+        Interactable.__init__(self, Rect(canva, x1, y1, width, travel, "grey"))
 
 class Up_Path(Vertical_Path):
-    def __init__(self, travel):
-        super().__init__(travel)
+    def __init__(self, canva, x1, y1, width, travel):
+        super().__init__(canva, x1, y1, width, travel)
 
 class Down_Path(Vertical_Path):
-    def __init__(self, travel):
-        super().__init__(travel)
+    def __init__(self, canva, x1, y1, width, travel):
+        super().__init__(canva, x1, y1, width, travel)
         
 
 

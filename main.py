@@ -9,6 +9,8 @@ import build
 class Game:
     def __init__(self):
         '''Window property'''
+        self.__last_time=0
+        self.__current_time=0
         self.__interactive = []       # UI collision check
         self.__taken = []    # Space taken by towers
         self.__window_width = 1000
@@ -78,13 +80,13 @@ class Game:
         soldier=self.create_tower_card("soldier", 200, "red", 5, 0.2, 10)
         self.equip_tower(freezer)
         self.equip_tower(soldier)
-        zombie=self.spawn_enemy(self.__canva, 30, 30, 50, 10, "green")
-        self.__active_enemies.append(zombie)
+        zombie=self.spawn_enemy(self.__canva, 30, 30, 50, 1, "green")
 
-
+        path=build.Right_Path(self.__canva, 50, 300, 50, 850)
         self.__taken.append(self.__spawn.rect)
         self.__taken.append(self.__base.rect)
-        
+        self.__last_time=time.time()
+
         self.game_loop()
         # self.create_hotbar_slot(1)
         # self.create_hotbar_slot(2)
@@ -92,6 +94,7 @@ class Game:
         self.__window.mainloop()
 
     def game_loop(self):
+        self.__current_time=time.time()
         if not self.__running:
             self.__window.destroy()
             return
@@ -106,6 +109,10 @@ class Game:
         else:
             self.__current_tower_signal.change_color("green")
 
+        for i in self.__active_enemies:
+            delta_time=(self.__current_time - self.__last_time)*100
+            print(delta_time)
+            i.move_right(self.__canva, delta_time)
 
         #Update money
         self.__canva.itemconfig(
@@ -118,7 +125,7 @@ class Game:
         '''
 
         # Game logic goes here
-
+        self.__last_time=self.__current_time
         self.__window.after(16, self.game_loop)
 
 
@@ -265,10 +272,6 @@ class Game:
 
         #we have selected_tower list, should associate it with the slots, slot with equipped tower is a different color
         #For placing down towers, get the coord --> cord is the center of the tower-->half length, put the taken cord into a list
-            
-    def activate_enemy(self, inactive_enemy):
-        if isinstance(inactive_enemy, enemy.Enemy):
-            self.__active_enemies.append(inactive_enemy)
 
     def dist_cord_cord(self, rect1, rect2):
         cord1_x=rect1.cord_x
@@ -291,9 +294,11 @@ class Game:
         spawn_x=self.__spawn.rect.cord_x-width/2
         spawn_y=self.__spawn.rect.cord_y-height/2
         spawned_enemy=enemy.Enemy(canva, spawn_x, spawn_y, health, speed, color)
-        self.__active_enemies.append(enemy)
+        self.__active_enemies.append(spawned_enemy)
         return spawned_enemy
 
+    def builder(self, path_type):
+        pass
     # def condition_for_action(self, selected_tower):
     #     if selected_tower.cooldown_check() and :
 game = Game()

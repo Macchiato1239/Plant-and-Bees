@@ -35,18 +35,22 @@ class Enemy(Interactable):
         if isinstance(value, str):
             self.__color=value
 
-    def move_right(self):
-        self.__rect.x1+=self.__speed
-        self.__rect.x2+=self.__speed
-        pass
+    def move_right(self, canva, delta_time):
+        self.rect.x1+=self.__speed * delta_time
+        self.rect.y1+=self.__speed * delta_time
+        canva.move(self.rect.rect_id, self.__speed * delta_time, 0)
 
-    def move_left(self):
-        self.__rect.x1-=self.__speed
-        self.__rect.x2-=self.__speed
-        pass
+    def move_left(self, canva, delta_time):
+        self.rect.x1-=self.__speed * delta_time
+        self.rect.x2-=self.__speed * delta_time
+        canva.move(self.rect.rect_id, -self.__speed * delta_time, 0)
 
-    def move_top(self):
-        pass
+    def move_top(self, canva, delta_time):
+        self.rect.y1-=self.__speed * delta_time
+        self.rect.y2-=self.__speed * delta_time
+        canva.move(self.rect.rect_id, 0, -self.__speed * delta_time)
 
-    def move_bottom(self):
-        pass
+    def move_bottom(self, canva, delta_time):
+        self.rect.y1+=self.__speed * delta_time
+        self.rect.y2+=self.__speed * delta_time
+        canva.move(self.rect.rect_id, 0, self.__speed * delta_time)
