@@ -59,7 +59,6 @@ class Game:
         self.__filled_slot_color="red"
 
 
-
         '''Tower properties'''
         self.__equipped_towers=[]
         self.__max_towers=5
@@ -126,7 +125,10 @@ class Game:
         for i in range(len(self.__map)-1):
             path=build.Path(self.__canva, self.__map[i][0], self.__map[i][1], self.__map[i+1][0], self.__map[i+1][1])
             self.__taken.append(path.rect)
-        zombie=self.spawn_enemy(self.__canva, 30, 30, 50, 0.5, "green")
+
+        zombie=enemy.Enemy_Info(10, 1, "green", 30, 30)
+
+        self.spawn(zombie)
 
         '''
         Rendering base and spawn on top of all
@@ -154,6 +156,11 @@ class Game:
             self.__current_tower_signal.change_color("green")
 
         '''
+        Sorting enemies by distance covered'''
+        for i in self.__active_enemies:
+            print("distance covered: ", i.distance_covered)
+
+        '''
         Moving enemies'''
         for i in self.__active_enemies[:]:
 
@@ -166,6 +173,7 @@ class Game:
 
             delta_time=(self.__current_time-self.__last_time)*100
             cord_index=i.progress
+            print(i.progress)
 
             dest_x=self.__map[cord_index][0]
             dest_y=self.__map[cord_index][1]
@@ -367,17 +375,25 @@ class Game:
             return True
         return False
 
-    def spawn_enemy(self, canva, width, height, health, speed, color):
+    def spawn(self, enemy_info):
+        if not isinstance(enemy_info, enemy.Enemy_Info):
+            return
+        health=enemy_info.health
+        speed=enemy_info.speed
+        color=enemy_info.color
+        width=enemy_info.width
+        height=enemy_info.height
+
         spawn_x=self.__spawn.rect.cord_x-width/2
         spawn_y=self.__spawn.rect.cord_y-height/2
-        spawned_enemy=enemy.Enemy(canva, spawn_x, spawn_y, health, speed, color)
+
+
+
+        spawned_enemy=enemy.Enemy(self.__canva, spawn_x, spawn_y, width, height, health, speed, color)
         self.__active_enemies.append(spawned_enemy)
+
         return spawned_enemy
 
-    def builder(self, path_type):
-        pass
-    # def condition_for_action(self, selected_tower):
-    #     if selected_tower.cooldown_check() and :
 game = Game()
 game.create_game_loop()
 
