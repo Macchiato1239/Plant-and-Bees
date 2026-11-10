@@ -1,3 +1,13 @@
 # Improvement
-1. Adding move (to enemy)
-# Bug
+Next: Implement different tower types
+1. Implement waves
+2. Implement debuff
+3. Implement upgrade
+4. Implement deleting towers
+5. Implement menu before going into main game
+6. Implement selecting gamemode
+7. Implement equipping towers
+# Clean up
+1. Add abstraction
+2. Add inheritance
+3. Stop putting every functions inside the game class

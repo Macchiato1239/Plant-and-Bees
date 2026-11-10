@@ -6,16 +6,26 @@ class Enemy(Interactable): #this is supposed to be abc
         '''add armor, buff later
         health = damage'''
         super().__init__(Rect(canva, x1, y1, width, height, color))
+        self.__reward=health
         self.__health=health
         self.__speed=speed
         self.__progress=0
         self.__distance_covered=0
-        '''
-        self.__progress is the index of the item in a list of path, each index point to a pair of x,y (corners)'''
+        self.__buff=None
+        self.__debuff=None 
+        '''Buff and debuff is given during gameplay, not at spawn'''
 
+        '''self.__progress is the index of the item in a list of path,
+        each index point to a pair of x,y (corners)'''
+
+    @property
+    def reward(self):
+        return self.__reward
+    
     @property
     def health(self):
         return self.__health
+    
     @property
     def speed(self):
         return self.__speed
@@ -27,6 +37,22 @@ class Enemy(Interactable): #this is supposed to be abc
     @property
     def progress(self):
         return self.__progress
+
+    @property
+    def buff(self):
+        return self.__buff
+
+    @buff.setter
+    def buff(self, value):
+        self.__buff=value
+
+    @property
+    def debuff(self):
+        return self.__debuff
+
+    @debuff.setter
+    def debuff(self, value):
+        self.__debuff=value
     
     @progress.setter
     def progress(self, value):
@@ -121,15 +147,20 @@ class Enemy_Info:
     def height(self):
         return self.__height
 
-    
+class Enemy_dictionary:
+    def __init__(self):
+        self.__dictionary={}
 
-    '''
-Stats: Health, speed, -> Inherit from info card
-->Is universal on spawn
-UI: color, position: x,y, distance to base, progress
-    
-    '''
-'''
-The card points to the entity with a spawn function
-Enemy must be inside a the active list
-Enemy must already have predefined info'''
+    @property
+    def dictionary(self):
+        return self.__dictionary
+
+    def add(self, key, health, speed, color, width, height):
+        item=Enemy_Info(health, speed, color, width, height)
+        self.__dictionary[key]=item
+
+    def get(self, key):
+        return self.__dictionary[key]
+
+book=Enemy_dictionary()
+book.add(1, 10, 0.5, "green", 30, 30)

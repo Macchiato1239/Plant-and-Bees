@@ -6,6 +6,7 @@ import enemy
 import math
 import time
 import build
+from enemy import book
 class Game:
     def __init__(self):
         '''Window property'''
@@ -33,6 +34,13 @@ class Game:
         self.__base=build.Base(self.__canva, self.__base_health, 900, 300)
         self.__max_towers=40
 
+        self.__wave=[[1,0.5], #[Enemy, time before next spawn]
+                   [1,0.5],
+                   [1,0]]
+        self.__wave_progress=0
+        self.__time_til_next_spawn=0
+        self.__time_since_last_spawn=0
+        
         '''UI'''
         self.__money_display=self.__canva.create_text(
             50,50,
@@ -95,8 +103,8 @@ class Game:
             slot=self.create_hotbar_slot(i+1, self.__empty_slot_color)
             self.__hotbar[i]=slot
 
-        freezer=self.create_tower_card("freezer", 250, "blue", 4, 0.5, 100)
-        soldier=self.create_tower_card("soldier", 200, "red", 5, 0.2, 100)
+        freezer=self.create_tower_card("freezer", 250, "blue", 4, 0.7, 100)
+        soldier=self.create_tower_card("soldier", 200, "red", 5, 0.6, 100)
         self.equip_tower(freezer)
         self.equip_tower(soldier)
 
@@ -121,8 +129,8 @@ class Game:
             self.__taken.append(path.rect)
 
         '''Enemy'''
-        zombie=enemy.Enemy_Info(10, 0.5, "green", 30, 30)
-        self.spawn(zombie)
+        # zombie=enemy.Enemy_Info(10, 0.5, "green", 30, 30)
+        # self.spawn(zombie)
 
         '''Rendering base and spawn on top of all'''
         self.__canva.tag_raise(self.__spawn.rect.rect_id)
@@ -132,6 +140,7 @@ class Game:
 
     def game_loop(self):
         self.__current_time=time.time()
+        delta_time=(self.__current_time-self.__last_time)
         if not self.__running:
             self.__window.destroy()
             return
@@ -146,24 +155,33 @@ class Game:
             self.__current_tower_signal.change_color("red")
         else:
             self.__current_tower_signal.change_color("green")
-            
+
+        '''Spawning enemies from wave list'''
+        self.__time_since_last_spawn+=delta_time
+        if self.__time_since_last_spawn>=self.__time_til_next_spawn and self.__wave_progress!=-1:
+            self.spawn(book.get(self.__wave[self.__wave_progress][0]))
+            self.__time_til_next_spawn=self.__wave[self.__wave_progress][1]
+            if self.__wave_progress!=len(self.__wave)-1:
+                self.__wave_progress+=1
+            else:
+                self.__wave_progress=-1
+            self.__time_since_last_spawn=0
+        
         '''Moving enemies'''
         for i in self.__active_enemies[:]:
-
+            
             '''
             Loop through a copy version of the list,
             So to remove enemies if they die or reach base,
             this is to fix skipping items in the list
             '''
 
-
-            delta_time=(self.__current_time-self.__last_time)*100
             cord_index=i.progress
 
             dest_x=self.__map[cord_index][0]
             dest_y=self.__map[cord_index][1]
 
-            if i.move(self.__canva, dest_x, dest_y, delta_time):
+            if i.move(self.__canva, dest_x, dest_y, delta_time*100):
                 '''
                 Enemy reached a corner OR base
                 '''
@@ -173,9 +191,9 @@ class Game:
                     self.__active_enemies.remove(i)
                 else:
                     i.progress+=1
-                    i.move(self.__canva, self.__map[i.progress][0], self.__map[i.progress][1], delta_time)
+                    i.move(self.__canva, self.__map[i.progress][0], self.__map[i.progress][1], delta_time*100)
             else:
-                i.move(self.__canva, dest_x, dest_y, delta_time)
+                i.move(self.__canva, dest_x, dest_y, delta_time*100)
 
         '''Tower actions'''
         for tower in self.__active_towers:
@@ -194,15 +212,6 @@ class Game:
                 continue
             final_target.health-=damage
 
-        if self.__active_enemies:
-            for i in self.__active_enemies:
-                print("health: ", i.health)
-        else:
-            print("none")
-
-
-
-
 
         '''Money UI'''
         self.__canva.itemconfig(
@@ -218,8 +227,10 @@ class Game:
         '''Deleting dead enemies'''
         for i in self.__active_enemies[:]:
             if i.health<=0:
+                self.__money+=i.reward
                 self.__active_enemies.remove(i)
                 i.delete()
+
         self.__last_time=self.__current_time
         self.__window.after(16, self.game_loop)
 
