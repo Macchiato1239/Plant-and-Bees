@@ -31,6 +31,9 @@ class Game:
         self.__starting_money=600
         self.__money=self.__starting_money
         self.__base=build.Base(self.__canva, self.__base_health, 900, 300)
+        self.__max_towers=40
+
+        '''UI'''
         self.__money_display=self.__canva.create_text(
             50,50,
             text=f"{self.__money}",
@@ -42,11 +45,7 @@ class Game:
             text=f"{self.__base_health}",
             font=("Arial", 24),
             fill="red")
-        '''
-        self.__spawn is a collection of coordinate for enemy to spawn in, one by one, never many at once
-        For i in self.__spawn:
-            With the cord of the spawn, we can spawn enemy in the middle of the spawn's rect
-        '''
+
 
 
         '''Hot Bar Properties'''
@@ -63,6 +62,7 @@ class Game:
         self.__equipped_towers=[]
         self.__max_towers=5
         self.__towers=[]
+        self.__active_towers=[]
 
         self.__current_tower=None
         self.__current_tower_signal=self.create_rect(0, 0, 30, 30, "red")
@@ -75,16 +75,12 @@ class Game:
                     [350, 400], #+250
                     [350, 300], #+100
                     [self.__base.rect.cord_x, self.__base.rect.cord_y]] #+550
-        '''
-        if x2=x1 -> vertical -->length = abs(y2-y1)
-        if y2=y1 -> horizontal --> length = abs(x2-x1)
-        '''
 
         self.__map_length=0
 
 
-        '''Enemies stuff'''
-        self.__closest=None #Closest to base
+        '''Enemies properties'''
+
 
     def create_game_loop(self):
         self.__window.geometry(
@@ -99,8 +95,8 @@ class Game:
             slot=self.create_hotbar_slot(i+1, self.__empty_slot_color)
             self.__hotbar[i]=slot
 
-        freezer=self.create_tower_card("freezer", 250, "blue", 4, 0.5, 10)
-        soldier=self.create_tower_card("soldier", 200, "red", 5, 0.2, 10)
+        freezer=self.create_tower_card("freezer", 250, "blue", 4, 0.5, 100)
+        soldier=self.create_tower_card("soldier", 200, "red", 5, 0.2, 100)
         self.equip_tower(freezer)
         self.equip_tower(soldier)
 
@@ -119,20 +115,16 @@ class Game:
                 self.__map_length+=abs(self.__map[i][0]-self.__map[i-1][0])
                 print("vertical: ", self.__map_length)
 
-        '''
-        Path creation from self.__map
-        '''
+        '''Path creation from self.__map'''
         for i in range(len(self.__map)-1):
             path=build.Path(self.__canva, self.__map[i][0], self.__map[i][1], self.__map[i+1][0], self.__map[i+1][1])
             self.__taken.append(path.rect)
 
-        zombie=enemy.Enemy_Info(10, 1, "green", 30, 30)
-
+        '''Enemy'''
+        zombie=enemy.Enemy_Info(10, 0.5, "green", 30, 30)
         self.spawn(zombie)
 
-        '''
-        Rendering base and spawn on top of all
-        '''
+        '''Rendering base and spawn on top of all'''
         self.__canva.tag_raise(self.__spawn.rect.rect_id)
         self.__canva.tag_raise(self.__base.rect.rect_id)
         self.game_loop()
@@ -154,14 +146,8 @@ class Game:
             self.__current_tower_signal.change_color("red")
         else:
             self.__current_tower_signal.change_color("green")
-
-        '''
-        Sorting enemies by distance covered'''
-        for i in self.__active_enemies:
-            print("distance covered: ", i.distance_covered)
-
-        '''
-        Moving enemies'''
+            
+        '''Moving enemies'''
         for i in self.__active_enemies[:]:
 
             '''
@@ -173,7 +159,6 @@ class Game:
 
             delta_time=(self.__current_time-self.__last_time)*100
             cord_index=i.progress
-            print(i.progress)
 
             dest_x=self.__map[cord_index][0]
             dest_y=self.__map[cord_index][1]
@@ -192,34 +177,51 @@ class Game:
             else:
                 i.move(self.__canva, dest_x, dest_y, delta_time)
 
-        '''
-        Money UI
-        '''
+        '''Tower actions'''
+        for tower in self.__active_towers:
+            in_range=[]
+            damage=tower.act()
+
+            if not damage:
+                continue
+
+            for enemy in self.__active_enemies:
+                if self.range_enemy_tower(enemy, tower):
+                    in_range.append(enemy)
+
+            final_target=self.enemy_sorter(in_range)
+            if final_target==0:
+                continue
+            final_target.health-=damage
+
+        if self.__active_enemies:
+            for i in self.__active_enemies:
+                print("health: ", i.health)
+        else:
+            print("none")
+
+
+
+
+
+        '''Money UI'''
         self.__canva.itemconfig(
             self.__money_display,
             text=f"{self.__money}"
         )
 
-        '''
-        Health UI
-        '''
+        '''Health UI'''
         self.__canva.itemconfig(
             self.__health_display,
             text=f"{self.__base_health}"
         )
-
-        '''
-        Towers' action
-        '''
-
-        # Game logic goes here
+        '''Deleting dead enemies'''
+        for i in self.__active_enemies[:]:
+            if i.health<=0:
+                self.__active_enemies.remove(i)
+                i.delete()
         self.__last_time=self.__current_time
         self.__window.after(16, self.game_loop)
-
-
-
-
-
 
 
 
@@ -285,6 +287,7 @@ class Game:
         return created_tower
 
     def equip_tower(self, selected_tower):
+        '''Select towers to be in the 5 slots'''
         if isinstance(selected_tower, module_tower.Tower_Card):
             self.__equipped_towers.append(selected_tower)
             if len(self.__equipped_towers)>self.__max_towers:
@@ -293,11 +296,13 @@ class Game:
                 self.__hotbar[i].tower=v 
 
     def select_tower_card(self, selected_tower):
+        '''Decide which tower will be placed on the next left click'''
         if isinstance(selected_tower, module_tower.Tower_Card):
             self.__current_tower=selected_tower
             print(f"Locked onto the tower: {self.__current_tower.name}")
 
     def cancel_selection(self, event):
+        '''Cancel the tower thats being selected to perform other actions'''
         if event.keysym == "x":
             self.__current_tower=None
             print("Selection released", self.__current_tower)
@@ -308,7 +313,6 @@ class Game:
         tower=module_tower.Tower_Manifested(name, cost, color, damage, fire_rate, act_range, rect)
         self.__towers.append(tower) #does this create a duplicate version of tower and would it affect anything?
         return tower
-
 
 
     def place_tower(self,center_x,center_y):
@@ -336,16 +340,11 @@ class Game:
                                 self.__current_tower.fire_rate,
                                 self.__current_tower.act_range,
                                 rect)
+        self.__active_towers.append(tower) 
         self.__money-=self.__current_tower.cost
         self.__taken.append(rect)
-        
         return True
-         #check if the rect collide with the others
-        '''
-        Check if the cord clicked is inside any of the taken area
-        if yes, print cant place and do not place
-        else place it down and append the cord to the space taken list
-        '''
+
     def compare_cord_rect(self, cord_x, cord_y, rect_list):
         for i in rect_list:
             i_x1=i.x1
@@ -393,6 +392,15 @@ class Game:
         self.__active_enemies.append(spawned_enemy)
 
         return spawned_enemy
+    def enemy_sorter(self, enemies):
+        most_covered=0
+        closest_enemy=0
+        for i in enemies:
+            if i.distance_covered>most_covered:
+                most_covered=i.distance_covered
+                closest_enemy=i
+        return closest_enemy
+
 
 game = Game()
 game.create_game_loop()

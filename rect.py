@@ -21,6 +21,9 @@ class Rect():
             self.__canva.itemconfig(self.__rect_id, fill=value)
             self.__fill=value
 
+    def delete(self):
+        self.__canva.delete(self.__rect_id)
+
     @property 
     def cord_x(self):
         return self.__x1+self.__width/2

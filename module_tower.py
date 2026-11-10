@@ -1,10 +1,10 @@
 from rect import Rect
 from interactable import Interactable
 import time
-'''
-Tower_Card contains the information about the default stats and abilities of the tower'''
+
 class Tower_Card():
-    def __init__(self, name, cost, color, damage, fire_rate, act_range, size=30):
+    '''Tower_Card contains the information about the default stats and abilities of the tower'''
+    def __init__(self, name, cost, color, damage, fire_rate, act_range, size=20):
         self.__name=name
         self.__cost=cost
         self.__color=color
@@ -59,9 +59,8 @@ class Tower_Card():
             self.__damage=value
 
 
-'''
-Tower_Manifested are the towers that are placed down, therefore a manifestation of the info card'''
 class Tower_Manifested(Tower_Card): 
+    '''Tower_Manifested are the towers that are placed down, therefore a manifestation of the info card'''
     def __init__(self, name, cost, color, damage, fire_rate, act_range, rect):
         super().__init__(name, cost, color, damage, fire_rate, act_range)
         self.__rect=rect
@@ -70,6 +69,7 @@ class Tower_Manifested(Tower_Card):
     @property
     def rect(self):
         return self.__rect
+    
     @property
     def last_act(self):
         return self.__last_act
@@ -79,13 +79,17 @@ class Tower_Manifested(Tower_Card):
 
     def cooldown_check(self):
         current_time=time.monotonic()
-        if current_time-self.__last_act<self.__fire_rate:
+        if current_time-self.__last_act<self.fire_rate:
             return False
         self.__last_act=current_time
-        '''Has already done cooling down'''
         return True 
-    '''cooldown is calculated within the tower, range is checked by the game itself'''
     
 
     def act(self):
-        pass #Start shooting
+        '''Go through the enemies list -> find those in range -> find the one closest to base ->return damage'''
+        if self.cooldown_check():
+            return self.damage
+        else:
+            return False
+
+        

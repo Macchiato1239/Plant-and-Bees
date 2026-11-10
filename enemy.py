@@ -89,6 +89,9 @@ class Enemy(Interactable): #this is supposed to be abc
                 canva.move(self.rect.rect_id, 0, di*self.__speed * delta_time)
                 y_reach=False
         return x_reach and y_reach
+
+    def delete(self):
+        self.rect.delete()
         
 
 class Enemy_Info:
