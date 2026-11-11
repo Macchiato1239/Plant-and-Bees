@@ -2,8 +2,9 @@ import tkinter as tk
 from rect import Rect
 import hotbar
 import module_tower
-from module_tower import TowerInfo, Tower, EffectType, DpsStats, DebuffStats, IncomeStats, SupportStats
+from module_tower import TowerInfo, Tower, DpsStats, DebuffStats, IncomeStats, SupportStats
 from module_tower import DpsTower, DebuffTower, Farm, SupportTower
+from debuff import EffectType
 import enemy
 import math
 import time
@@ -113,6 +114,7 @@ class Game:
         self.equip_tower(1)
         self.equip_tower(2)
         self.equip_tower(3)
+        self.equip_tower(4)
 
         self.__taken.append(self.__spawn.rect)
         self.__taken.append(self.__base.rect)

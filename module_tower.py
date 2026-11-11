@@ -2,16 +2,8 @@ from rect import Rect
 from interactable import Interactable
 import time
 from dataclasses import dataclass
-from enum import Enum, auto
 from abc import ABC, abstractmethod
-
-
-class EffectType(Enum):
-    FROZEN=auto(),
-    STUN=auto(),
-    SLOW=auto(),
-    BURN=auto(),
-
+from debuff import EffectType
 @dataclass(frozen=True)
 class DpsStats:
     damage: float | int 

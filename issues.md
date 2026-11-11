@@ -1,7 +1,6 @@
 # Improvement
-Next: Implement different tower types
-Implement waves
-2. Implement debuff
+1. Make farm
+2. Clean up
 3. Implement upgrade
 4. Implement deleting towers
 4. Render projectile
