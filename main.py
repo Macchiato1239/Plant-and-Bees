@@ -135,7 +135,9 @@ class Game:
         '''Enemy'''
         wave1=[[[1,0.5]]*4+[[1,0]]]
         wave2=[[[1,0.5]]*6+[[1,0]]]
-        self.__mode+=wave1+wave2
+        wave3=[[[2,0.3]]*2+[[2,1]]+[[1,0.5]]*4]
+        wave4=[[[2,0.3]]+[[2,0.5]]+[[3,0.8]]*5]
+        self.__mode+=wave1+wave2+wave3+wave4
 
         # zombie=enemy.Enemy_Info(10, 0.5, "green", 30, 30)
         # self.spawn(zombie)
@@ -208,6 +210,7 @@ class Game:
                     print("End reached")
                     self.__base_health=max(0, self.__base_health-i.health)
                     self.__active_enemies.remove(i)
+                    i.delete()
                 else:
                     i.progress+=1
                     i.move(self.__canva, self.__map[i.progress][0], self.__map[i.progress][1], delta_time*100)
@@ -414,6 +417,7 @@ class Game:
     def spawn(self, enemy_info):
         if not isinstance(enemy_info, enemy.Enemy_Info):
             return
+        name=enemy_info.name
         health=enemy_info.health
         speed=enemy_info.speed
         color=enemy_info.color
@@ -425,7 +429,7 @@ class Game:
 
 
 
-        spawned_enemy=enemy.Enemy(self.__canva, spawn_x, spawn_y, width, height, health, speed, color)
+        spawned_enemy=enemy.Enemy(self.__canva, name, spawn_x, spawn_y, width, height, health, speed, color)
         self.__active_enemies.append(spawned_enemy)
 
         return spawned_enemy

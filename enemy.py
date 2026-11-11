@@ -2,10 +2,11 @@ from rect import Rect
 from interactable import Interactable
 from abc import ABC, abstractmethod
 class Enemy(Interactable): #this is supposed to be abc
-    def __init__(self, canva, x1, y1, width, height, health, speed, color): 
+    def __init__(self, canva, name, x1, y1, width, height, health, speed, color): 
         '''add armor, buff later
         health = damage'''
         super().__init__(Rect(canva, x1, y1, width, height, color))
+        self.__name=name
         self.__reward=health
         self.__health=health
         self.__speed=speed
@@ -17,6 +18,9 @@ class Enemy(Interactable): #this is supposed to be abc
 
         '''self.__progress is the index of the item in a list of path,
         each index point to a pair of x,y (corners)'''
+    @property
+    def name(self):
+        return self.__name
 
     @property
     def reward(self):
@@ -121,12 +125,17 @@ class Enemy(Interactable): #this is supposed to be abc
         
 
 class Enemy_Info:
-    def __init__(self, health, speed, color, width, height):
+    def __init__(self, name, health, speed, color, width, height):
+        self.__name=name
         self.__health=health
         self.__speed=speed
         self.__color=color
         self.__width=width
         self.__height=height
+
+    @property
+    def name(self):
+        return self.__name
 
     @property
     def health(self):
@@ -155,12 +164,14 @@ class Enemy_dictionary:
     def dictionary(self):
         return self.__dictionary
 
-    def add(self, key, health, speed, color, width, height):
-        item=Enemy_Info(health, speed, color, width, height)
+    def add(self, name, key, health, speed, color, width, height):
+        item=Enemy_Info(name, health, speed, color, width, height)
         self.__dictionary[key]=item
 
     def get(self, key):
         return self.__dictionary[key]
 
 book=Enemy_dictionary()
-book.add(1, 10, 0.5, "green", 30, 30)
+book.add("normal", 1, 10, 0.5, "green", 30, 30)
+book.add("swift", 2, 12, 1, "lime", 26, 26)
+book.add("heavy", 3, 60, 0.25, "black", 32, 32)

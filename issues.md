@@ -1,6 +1,6 @@
 # Improvement
 Next: Implement different tower types
-1. Implement waves
+Implement waves
 2. Implement debuff
 3. Implement upgrade
 4. Implement deleting towers
