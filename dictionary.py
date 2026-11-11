@@ -1,5 +1,6 @@
 from enemy import Enemy, Enemy_Info
-from module_tower import Tower_Info, Tower
+from module_tower import TowerInfo, Tower, EffectType, DpsStats, DebuffStats, IncomeStats, SupportStats
+from module_tower import DpsTower, DebuffTower, Farm, SupportTower
 from abc import ABC, abstractmethod
 class Dictionary(ABC):
     def __init__(self):
@@ -15,13 +16,6 @@ class Dictionary(ABC):
 
     def get(self, key):
         return self.__dictionary[key]
-class Tower_Dictionary(Dictionary):
-    def __init__(self):
-        super().__init__()
-
-    def add(self, name, key, cost, color, damage, fire_rate, act_range, size=20):
-        item=Tower_Info(name, cost, color, damage, fire_rate, act_range, size=20)
-        self.dictionary[key]=item
     
 class Enemy_Dictionary(Dictionary):
     def __init__(self):
@@ -31,11 +25,48 @@ class Enemy_Dictionary(Dictionary):
         item=Enemy_Info(name, health, speed, color, width, height)
         self.dictionary[key]=item
 
+class Tower_Dictionary(Dictionary):
+    def __init__(self):
+        super().__init__()
+
+    def add(self, type, key, name, cost, color, act_range, size, dps=None, debuff=None, support=None, income=None):
+        if type == "dps":
+            item=TowerInfo(name, cost, color, act_range, size, dps)
+        elif type == "debuff":
+            item=TowerInfo(name, cost, color, act_range, size, dps, debuff)
+        elif type =="support":
+            item=TowerInfo(name, cost, color, act_range, size, support)
+        elif type =="income":
+            item=TowerInfo(name, cost, color, act_range, size, income)
+        self.dictionary[key]=[type,item]
+
+    def get(self,key):
+        packet=super().get(key)
+        return packet[1]
+
+
+    def summon_tower(self, key, rect):
+        tower_type=self.dictionary[key][0]
+        tower_info=self.dictionary[key][1]
+
+        if tower_type=="dps":
+            tower=DpsTower(tower_info, rect)
+        elif tower_type=="debuff":
+            tower=DebuffTower(tower_info, rect)
+        elif tower_type=="support":
+            tower=SupportTower(tower_info, rect)
+        elif tower_type=="income":
+            tower=Farm(tower_info, rect)
+        return tower
+        
 Ebook=Enemy_Dictionary()
+
 Ebook.add("normal", 1, 10, 0.5, "green", 30, 30)
 Ebook.add("swift", 2, 12, 1, "lime", 26, 26)
 Ebook.add("heavy", 3, 60, 0.25, "black", 32, 32)
 
 Tbook=Tower_Dictionary()
-Tbook.add("soldier", 1, 200, "red", 5, 0.5, 100, 20)
-Tbook.add("freezer", 2, 250, "blue", 4, 0.6, 150, 20)
+
+Tbook.add(type="dps", key=1, name="soldier", cost=200, color="red", act_range=200, size=20, dps=DpsStats(5, 0.5))
+Tbook.add(type="debuff", key=2, name="freezer", cost=200, color="blue", act_range=200, size=20, dps=DpsStats(5, 0.5), debuff=DebuffStats(EffectType.FROZEN,1,0.2))
+Tbook.add(type="dps", key=3, name="minigunner", cost=400, color="yellow", act_range=300, size=20, dps=DpsStats(7,0.25))

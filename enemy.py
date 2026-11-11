@@ -35,7 +35,7 @@ class Enemy(Interactable): #this is supposed to be abc
         return self.__freeze
     @freeze.setter
     def freeze(self, value):
-        if isinstance(value, [int, float]):
+        if isinstance(value, (int, float)):
             self.__freeze=value
 
     @property
@@ -44,7 +44,7 @@ class Enemy(Interactable): #this is supposed to be abc
     @freeze_level.setter
     def freeze_level(self, value):
         if isinstance(value, int):
-            self.freeze_level=value
+            self.__freeze_level=min(4,value)
 
     @property
     def burn(self):
@@ -59,7 +59,7 @@ class Enemy(Interactable): #this is supposed to be abc
         return self.__burn_damage
     @burn_damage.setter
     def burn_damage(self,value):
-        if isinstance(value, [float, int]):
+        if isinstance(value, (float, int)):
             self.__burn_damage=value
 
     @property
@@ -172,7 +172,7 @@ class Enemy(Interactable): #this is supposed to be abc
                 y_reach=False
         return x_reach and y_reach
 
-    def debuff(self, delta_time):
+    def process_debuff(self, delta_time):
         if self.__burn!=0:
             self.__health-=self.__burn_damage
             self.__burn=max(0, self.__burn-delta_time)
@@ -185,13 +185,11 @@ class Enemy(Interactable): #this is supposed to be abc
                 self.__stun=0.6
                 self.__freeze_level=0
                 self.__freeze=0
-        else:
-            self.__speed=self.__initial_speed
 
         if self.__stun!=0:
             self.__speed=0
             self.__stun=max(0, self.__stun-delta_time)
-        else:
+        if self.__stun==0 and self.__freeze==0:
             self.__speed=self.__initial_speed
 
     def delete(self):

@@ -1,21 +1,80 @@
 from rect import Rect
 from interactable import Interactable
 import time
+from dataclasses import dataclass
+from enum import Enum, auto
+from abc import ABC, abstractmethod
 
-class Tower_Info():
-    '''Tower_Card contains the information about the default stats and abilities of the tower'''
-    def __init__(self, name, cost, color, damage, fire_rate, act_range, size=20):
-        self.__name=name
-        self.__cost=cost
-        self.__color=color
-        self.__damage=damage
-        self.__fire_rate=fire_rate
-        self.__act_range=act_range
-        self.__size=size 
+
+class EffectType(Enum):
+    FROZEN=auto(),
+    STUN=auto(),
+    SLOW=auto(),
+    BURN=auto(),
+
+@dataclass(frozen=True)
+class DpsStats:
+    damage: float | int 
+    fire_rate: float | int
+
+@dataclass(frozen=True)
+class DebuffStats:
+    type: EffectType
+    magnitude: float | int
+    duration: float | int
+
+@dataclass(frozen=True)
+class IncomeStats:
+    income: int
+
+@dataclass(frozen=True)
+class SupportStats:
+    fire_rate: float | int
+    cost: int
+    act_range: float | int
+    damage: float | int
+
+@dataclass(frozen=True)
+class TowerInfo():
+    '''Contains the information about the default stats and abilities of the tower'''
+    name: str
+    cost: int
+    color: str
+    act_range: float | int
+    size: float | int
+
+    dps: DpsStats | None=None
+    debuff: DebuffStats | None=None
+    income: IncomeStats | None=None
+    support: SupportStats | None=None
+
+
+class Tower(Interactable, ABC): 
+    '''Tower_Manifested are the towers that are placed down, therefore a manifestation of the info card'''
+    def __init__(self, TowerInfo, rect):
+        self.__name=TowerInfo.name
+        self.__cost=TowerInfo.cost
+        self.__color=TowerInfo.color
+        self.__act_range=TowerInfo.act_range
+        self.__size=TowerInfo.size
+        super().__init__(rect)
+        self.__last_act=0
 
     @property
     def name(self):
         return self.__name
+
+    @property
+    def size(self):
+        return self.__size
+    
+    @property
+    def last_act(self):
+        return self.__last_act
+    
+    @last_act.setter
+    def last_act(self, value):
+        self.__last_act=value
 
     @property
     def cost(self):
@@ -29,9 +88,32 @@ class Tower_Info():
     def color(self):
         return self.__color
 
+
     @property
-    def size(self):
-        return self.__size
+    def act_range(self):
+        return self.__act_range
+    @act_range.setter
+    def act_range(self, value):
+        if isinstance(value, int) or isinstance(value, float):
+            self.__act_range=value
+
+    def cooldown_check(self):
+        current_time=time.monotonic()
+        if current_time-self.__last_act<self.fire_rate:
+            return False
+        self.__last_act=current_time
+        return True 
+    
+    @abstractmethod
+    def act(self):
+        pass
+        
+
+class DpsTower(Tower):
+    def __init__(self, TowerInfo, rect):
+        super().__init__(TowerInfo, rect)
+        self.__damage=TowerInfo.dps.damage
+        self.__fire_rate=TowerInfo.dps.fire_rate
 
     @property
     def fire_rate(self):
@@ -43,14 +125,6 @@ class Tower_Info():
             self.__fire_rate=value
 
     @property
-    def act_range(self):
-        return self.__act_range
-    @act_range.setter
-    def act_range(self, value):
-        if isinstance(value, int) or isinstance(value, float):
-            self.__act_range=value
-
-    @property
     def damage(self):
         return self.__damage
     @damage.setter
@@ -58,55 +132,101 @@ class Tower_Info():
         if isinstance(value, int):
             self.__damage=value
 
-class DPS_Tower(Tower_Info):
-    def __init__():
-        pass
-
-class Debuff_Tower(Tower_Info):
-    def __init__():
-        pass
-
-class Support_Tower(Tower_Info):
-    def __init__():
-        pass
-
-class Farm(Tower_Info):
-    def __init__():
-        pass
-
-
-
-
-class Tower(Tower_Info): 
-    '''Tower_Manifested are the towers that are placed down, therefore a manifestation of the info card'''
-    def __init__(self, name, cost, color, damage, fire_rate, act_range, rect):
-        super().__init__(name, cost, color, damage, fire_rate, act_range)
-        self.__rect=rect
-        self.__last_act=0
-
-    @property
-    def rect(self):
-        return self.__rect
-    
-    @property
-    def last_act(self):
-        return self.__last_act
-    @last_act.setter
-    def last_act(self, value):
-        self.__last_act=value
-
-    def cooldown_check(self):
-        current_time=time.monotonic()
-        if current_time-self.__last_act<self.fire_rate:
-            return False
-        self.__last_act=current_time
-        return True 
-    
-
     def act(self):
-        '''Go through the enemies list -> find those in range -> find the one closest to base ->return damage'''
-        if self.cooldown_check():
-            return self.damage
-        else:
-            return False
+        current_time=time.time()
+        delta_time=current_time-self.last_act
+        if delta_time>=self.__fire_rate:
+            self.last_act=current_time
+            return self.__damage
 
+
+class DebuffTower(DpsTower):
+    def __init__(self, TowerInfo, rect):
+        super().__init__(TowerInfo, rect)
+        self.__type=TowerInfo.debuff.type
+        self.__magnitude=TowerInfo.debuff.magnitude
+        self.__duration=TowerInfo.debuff.duration
+
+    @property
+    def type(self):
+        return self.__type
+
+    @property
+    def magnitude(self):
+        return self.__magnitude
+    
+    @magnitude.setter
+    def magnitude(self, value):
+        if isinstance(value, (float, int)):
+            self.__magnitude=value
+
+    @property
+    def duration(self):
+        return self.__duration
+
+    @duration.setter
+    def duration(self, value):
+        if isinstance(value, (float, int)):
+            self.__duration=value
+    def act(self):
+        damage=super().act()
+        return damage
+
+
+
+class SupportTower(Tower):
+    def __init__(self, TowerInfo, rect):
+        super().__init__(TowerInfo, rect)
+        self.__fire_rate_boost=TowerInfo.support.fire_rate
+        self.__act_range_boost=TowerInfo.support.act_range
+        self.__damage_boost=TowerInfo.support.damage
+        self.__cost_boost=TowerInfo.support.cost
+
+    @property
+    def fire_rate_boost(self):
+        return self.__fire_rate_boost
+
+    @fire_rate_boost.setter
+    def fire_rate_boost(self, value):
+        if isinstance(value, (float, int)):
+            self.__fire_rate_boost=value
+    
+    @property
+    def act_range_boost(self):
+        return self.__act_range_boost
+
+    @act_range_boost.setter
+    def act_range_boost(self, value):
+        if isinstance(value, (float, int)):
+            self.__act_range_boost=value
+
+    @property
+    def damage_boost(self):
+        return self.__damage_boost
+
+    @damage_boost.setter
+    def damage_boost(self, value):
+        if isinstance(value, (float, int)):
+            self.__damage_boost=value
+
+    @property
+    def cost_boost(self):
+        return self.__cost_boost
+
+    @cost_boost.setter
+    def fire_rate_boost(self, value):
+        if isinstance(value, (float, int)):
+            self.__fire_rate_boost=value
+
+class Farm(Tower):
+    def __init__(self, TowerInfo, rect):
+        super().__init__(TowerInfo, rect)
+        self.__income=TowerInfo.income.income
+
+    @property
+    def income(self):
+        return self.__income
+    @income.setter
+    def income(self, value):
+        if isinstance(value, int):
+            self.__income=value

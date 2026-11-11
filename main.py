@@ -2,6 +2,8 @@ import tkinter as tk
 from rect import Rect
 import hotbar
 import module_tower
+from module_tower import TowerInfo, Tower, EffectType, DpsStats, DebuffStats, IncomeStats, SupportStats
+from module_tower import DpsTower, DebuffTower, Farm, SupportTower
 import enemy
 import math
 import time
@@ -35,8 +37,8 @@ class Game:
         self.__max_towers=40
 
         self.__mode=[]
-        self.__mode_progress=0 #Loop through the waves
         self.__wave_progress=0
+        self.__mode_progress=0
         self.__time_til_next_spawn=0
         self.__time_since_last_spawn=0
         
@@ -108,8 +110,9 @@ class Game:
             self.__hotbar[i]=slot
 
 
-        self.equip_tower(Tbook.get(1))
-        self.equip_tower(Tbook.get(2))
+        self.equip_tower(1)
+        self.equip_tower(2)
+        self.equip_tower(3)
 
         self.__taken.append(self.__spawn.rect)
         self.__taken.append(self.__base.rect)
@@ -189,6 +192,7 @@ class Game:
         
         '''Moving enemies'''
         for i in self.__active_enemies[:]:
+            i.process_debuff(delta_time)
             
             '''
             Loop through a copy version of the list,
@@ -218,20 +222,31 @@ class Game:
 
         '''Tower actions'''
         for tower in self.__active_towers:
-            in_range=[]
-            damage=tower.act()
+            if isinstance(tower, DpsTower):
+                in_range=[]
+                damage=tower.act()
+                if not damage:
+                    continue
 
-            if not damage:
-                continue
+                for enemy in self.__active_enemies:
+                    if self.range_enemy_tower(enemy, tower):
+                        in_range.append(enemy)
 
-            for enemy in self.__active_enemies:
-                if self.range_enemy_tower(enemy, tower):
-                    in_range.append(enemy)
+                final_target=self.enemy_sorter(in_range)
+                if final_target==0:
+                    continue
+                final_target.health-=damage
+                if isinstance(tower, DebuffTower):
+                    print(f"tower type: ", tower.type)
+                    if tower.type==EffectType.FROZEN:
+                        final_target.freeze=tower.duration
+                        final_target.freeze_level+=tower.magnitude
+            elif isinstance(tower, SupportTower):
+                pass
+            elif isinstance(tower, Farm):
+                pass
+        
 
-            final_target=self.enemy_sorter(in_range)
-            if final_target==0:
-                continue
-            final_target.health-=damage
 
 
         '''Money UI'''
@@ -277,7 +292,6 @@ class Game:
         rect=Rect(self.__canva, x1, y1, width, height, fill)
         return rect
 
-
     def interact_with_ui(self, event):
         x,y=self.get_click_cord(event)
         for i in self.__interactive:
@@ -285,11 +299,11 @@ class Game:
             i_width=i.rect.width
             i_y1=i.rect.y1
             i_height=i.rect.height
-            ''' Checking for UI '''
+
             if i_x1<x<i_x1+i_width and i_y1<y<i_y1+i_height:
                 if isinstance(i, hotbar.Slot):
                     if i.tower!=None:
-                        print(f"Hotbar's slot clicked, it's a {i.tower.name}")
+                        print(f"Hotbar's slot clicked, it's a {Tbook.get(i.tower).name}")
                         self.select_tower_card(i.tower)
                         return True
                     else:
@@ -306,8 +320,6 @@ class Game:
             print("Tower placed")
             self.__current_tower=None
 
-
-
     def create_hotbar_slot(self, num, color="black", selected_tower=None):
         hotbar_slot=hotbar.Slot(self.create_rect(self.__hotbar_slot_x1+(self.__hotbar_slot_width+50)*(num-1),
                                     self.__hotbar_slot_y1,
@@ -319,45 +331,32 @@ class Game:
         self.__interactive.append(hotbar_slot)
         return hotbar_slot
 
-    def create_tower_card(self, name, cost, color, damage, fire_rate, act_range):
-        created_tower=module_tower.Tower_Info(name, cost, color, damage, fire_rate, act_range)
-        return created_tower
-
-    def equip_tower(self, selected_tower):
+    def equip_tower(self, tower):
         '''Select towers to be in the 5 slots'''
-        if isinstance(selected_tower, module_tower.Tower_Info):
-            self.__equipped_towers.append(selected_tower)
+        if isinstance(tower, int):
+            self.__equipped_towers.append(tower)
             if len(self.__equipped_towers)>self.__max_towers:
                 self.__equipped_towers.pop(0)
             for i,v in enumerate(self.__equipped_towers):
-                self.__hotbar[i].tower=v 
+                self.__hotbar[i].tower=v
 
-    def select_tower_card(self, selected_tower):
+    def select_tower_card(self, tower):
         '''Decide which tower will be placed on the next left click'''
-        if isinstance(selected_tower, module_tower.Tower_Info):
-            self.__current_tower=selected_tower
-            print(f"Locked onto the tower: {self.__current_tower.name}")
+        if isinstance(tower, int):
+            self.__current_tower=tower
 
     def cancel_selection(self, event):
         '''Cancel the tower thats being selected to perform other actions'''
         if event.keysym == "x":
             self.__current_tower=None
-            print("Selection released", self.__current_tower)
-
-    def create_tower(self, name, cost, color, damage, fire_rate, act_range, rect):
-        if self.__current_tower==None:
-            return
-        tower=module_tower.Tower(name, cost, color, damage, fire_rate, act_range, rect)
-        self.__towers.append(tower) #does this create a duplicate version of tower and would it affect anything?
-        return tower
-
 
     def place_tower(self,center_x,center_y):
-        if self.__money<self.__current_tower.cost:
+        tower_info=Tbook.get(self.__current_tower)
+        if self.__money<tower_info.cost:
             print("Not enough money")
             self.__current_tower=None
             return False
-        rad=self.__current_tower.size
+        rad=tower_info.size
         x1=center_x-rad
         y1=center_y-rad
         x2=center_x+rad
@@ -368,18 +367,14 @@ class Game:
         y4=y2
         if self.compare_cord_rect(x1, y1, self.__taken) or self.compare_cord_rect(x2, y2, self.__taken) or self.compare_cord_rect(x3,y3, self.__taken) or self.compare_cord_rect(x4,y4,self.__taken):
             return False
-        color=self.__current_tower.color
+        color=tower_info.color
         rect=self.create_rect(x1,y1,rad*2,rad*2, color)
-        tower=self.create_tower(self.__current_tower.name,
-                                self.__current_tower.cost,
-                                color,
-                                self.__current_tower.damage,
-                                self.__current_tower.fire_rate,
-                                self.__current_tower.act_range,
-                                rect)
+        tower=Tbook.summon_tower(self.__current_tower, rect)
+        print(tower.color)
         self.__active_towers.append(tower) 
-        self.__money-=self.__current_tower.cost
+        self.__money-=tower.cost
         self.__taken.append(rect)
+        self.__towers.append(tower)
         return True
 
     def compare_cord_rect(self, cord_x, cord_y, rect_list):
@@ -429,6 +424,7 @@ class Game:
         self.__active_enemies.append(spawned_enemy)
 
         return spawned_enemy
+ 
     def enemy_sorter(self, enemies):
         most_covered=0
         closest_enemy=0
