@@ -29,30 +29,34 @@ class Game:
         self.__base_health=100
         self.__spawn=build.Spawn(self.__canva, 0, 300)
         self.__active_enemies=[]
-        self.__starting_money=600
+        self.__starting_money=800
         self.__money=self.__starting_money
         self.__base=build.Base(self.__canva, self.__base_health, 900, 300)
         self.__max_towers=40
 
-        self.__wave=[[1,0.5], #[Enemy, time before next spawn]
-                   [1,0.5],
-                   [1,0]]
+        self.__mode=[]
+        self.__mode_progress=0 #Loop through the waves
         self.__wave_progress=0
         self.__time_til_next_spawn=0
         self.__time_since_last_spawn=0
         
         '''UI'''
         self.__money_display=self.__canva.create_text(
-            50,50,
-            text=f"{self.__money}",
+            100,50,
+            text=f"Cash: {self.__money}",
             font=("Arial", 24),
-            fill="black")
+            fill="green")
 
         self.__health_display=self.__canva.create_text(
             500,50,
-            text=f"{self.__base_health}",
+            text=f"Health: {self.__base_health}",
             font=("Arial", 24),
             fill="red")
+        self.__wave_display=self.__canva.create_text(
+            700,50,
+            text=f"Wave {self.__mode_progress+1}",
+            font=("Arial", 20),
+            fill="black")
 
 
 
@@ -129,6 +133,10 @@ class Game:
             self.__taken.append(path.rect)
 
         '''Enemy'''
+        wave1=[[[1,0.5]]*4+[[1,0]]]
+        wave2=[[[1,0.5]]*6+[[1,0]]]
+        self.__mode+=wave1+wave2
+
         # zombie=enemy.Enemy_Info(10, 0.5, "green", 30, 30)
         # self.spawn(zombie)
 
@@ -156,16 +164,27 @@ class Game:
         else:
             self.__current_tower_signal.change_color("green")
 
-        '''Spawning enemies from wave list'''
+        '''Spawning enemies from the wave list'''
+
+
         self.__time_since_last_spawn+=delta_time
-        if self.__time_since_last_spawn>=self.__time_til_next_spawn and self.__wave_progress!=-1:
-            self.spawn(book.get(self.__wave[self.__wave_progress][0]))
-            self.__time_til_next_spawn=self.__wave[self.__wave_progress][1]
-            if self.__wave_progress!=len(self.__wave)-1:
-                self.__wave_progress+=1
-            else:
-                self.__wave_progress=-1
-            self.__time_since_last_spawn=0
+        if self.__mode_progress!=-1:
+            if self.__time_since_last_spawn>=self.__time_til_next_spawn and self.__wave_progress!=-1:
+                self.spawn(book.get(self.__mode[self.__mode_progress][self.__wave_progress][0]))
+                self.__time_til_next_spawn=self.__mode[self.__mode_progress][self.__wave_progress][1]
+                if self.__wave_progress!=len(self.__mode[self.__mode_progress])-1:
+                    self.__wave_progress+=1
+                else:
+                    self.__wave_progress=-1
+                self.__time_since_last_spawn=0
+
+        '''Check if the enemy in this wave is dead before going to the next wave'''
+        if not self.__active_enemies and self.__mode_progress!=-1:
+            self.__wave_progress=0
+            self.__mode_progress+=1
+            if self.__mode_progress==len(self.__mode):
+                self.__mode_progress = -1
+
         
         '''Moving enemies'''
         for i in self.__active_enemies[:]:
@@ -216,14 +235,21 @@ class Game:
         '''Money UI'''
         self.__canva.itemconfig(
             self.__money_display,
-            text=f"{self.__money}"
+            text=f"Cash: {self.__money}"
         )
 
         '''Health UI'''
         self.__canva.itemconfig(
             self.__health_display,
-            text=f"{self.__base_health}"
+            text=f"Health: {self.__base_health}"
         )
+
+        '''Wave counter UI'''
+        if self.__mode_progress!=-1:
+            self.__canva.itemconfig(
+                self.__wave_display,
+                text=f"Wave {self.__mode_progress+1}"
+            )
         '''Deleting dead enemies'''
         for i in self.__active_enemies[:]:
             if i.health<=0:
