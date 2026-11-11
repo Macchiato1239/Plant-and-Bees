@@ -2,7 +2,7 @@ from rect import Rect
 from interactable import Interactable
 import time
 
-class Tower_Card():
+class Tower_Info():
     '''Tower_Card contains the information about the default stats and abilities of the tower'''
     def __init__(self, name, cost, color, damage, fire_rate, act_range, size=20):
         self.__name=name
@@ -58,8 +58,26 @@ class Tower_Card():
         if isinstance(value, int):
             self.__damage=value
 
+class DPS_Tower(Tower_Info):
+    def __init__():
+        pass
 
-class Tower_Manifested(Tower_Card): 
+class Debuff_Tower(Tower_Info):
+    def __init__():
+        pass
+
+class Support_Tower(Tower_Info):
+    def __init__():
+        pass
+
+class Farm(Tower_Info):
+    def __init__():
+        pass
+
+
+
+
+class Tower(Tower_Info): 
     '''Tower_Manifested are the towers that are placed down, therefore a manifestation of the info card'''
     def __init__(self, name, cost, color, damage, fire_rate, act_range, rect):
         super().__init__(name, cost, color, damage, fire_rate, act_range)
@@ -92,4 +110,3 @@ class Tower_Manifested(Tower_Card):
         else:
             return False
 
-        

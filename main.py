@@ -6,7 +6,7 @@ import enemy
 import math
 import time
 import build
-from enemy import book
+from dictionary import Ebook, Tbook
 class Game:
     def __init__(self):
         '''Window property'''
@@ -107,10 +107,9 @@ class Game:
             slot=self.create_hotbar_slot(i+1, self.__empty_slot_color)
             self.__hotbar[i]=slot
 
-        freezer=self.create_tower_card("freezer", 250, "blue", 4, 0.7, 100)
-        soldier=self.create_tower_card("soldier", 200, "red", 5, 0.6, 100)
-        self.equip_tower(freezer)
-        self.equip_tower(soldier)
+
+        self.equip_tower(Tbook.get(1))
+        self.equip_tower(Tbook.get(2))
 
         self.__taken.append(self.__spawn.rect)
         self.__taken.append(self.__base.rect)
@@ -121,11 +120,11 @@ class Game:
             if self.__map[i][0]==self.__map[i-1][0]: 
                 '''x2=x1 -> horizontal -> length=abs(y2-y1)'''
                 self.__map_length+=abs(self.__map[i][1]-self.__map[i-1][1])
-                print("horizontal: ", self.__map_length)
+                
 
             if self.__map[i][1]==self.__map[i-1][1]: 
                 self.__map_length+=abs(self.__map[i][0]-self.__map[i-1][0])
-                print("vertical: ", self.__map_length)
+                
 
         '''Path creation from self.__map'''
         for i in range(len(self.__map)-1):
@@ -172,7 +171,7 @@ class Game:
         self.__time_since_last_spawn+=delta_time
         if self.__mode_progress!=-1:
             if self.__time_since_last_spawn>=self.__time_til_next_spawn and self.__wave_progress!=-1:
-                self.spawn(book.get(self.__mode[self.__mode_progress][self.__wave_progress][0]))
+                self.spawn(Ebook.get(self.__mode[self.__mode_progress][self.__wave_progress][0]))
                 self.__time_til_next_spawn=self.__mode[self.__mode_progress][self.__wave_progress][1]
                 if self.__wave_progress!=len(self.__mode[self.__mode_progress])-1:
                     self.__wave_progress+=1
@@ -267,12 +266,10 @@ class Game:
 
     def on_key_press(self, event): #Shutting down the game
         if event.keysym == "q":
-            print("Quitted")
             self.__running = False
 
     def get_click_cord(self, event): #Get coordinate of every click on the screen
         a=(f"X: {event.x}, Y: {event.y}")
-        print(a)
         return event.x, event.y
 
 
@@ -323,12 +320,12 @@ class Game:
         return hotbar_slot
 
     def create_tower_card(self, name, cost, color, damage, fire_rate, act_range):
-        created_tower=module_tower.Tower_Card(name, cost, color, damage, fire_rate, act_range)
+        created_tower=module_tower.Tower_Info(name, cost, color, damage, fire_rate, act_range)
         return created_tower
 
     def equip_tower(self, selected_tower):
         '''Select towers to be in the 5 slots'''
-        if isinstance(selected_tower, module_tower.Tower_Card):
+        if isinstance(selected_tower, module_tower.Tower_Info):
             self.__equipped_towers.append(selected_tower)
             if len(self.__equipped_towers)>self.__max_towers:
                 self.__equipped_towers.pop(0)
@@ -337,7 +334,7 @@ class Game:
 
     def select_tower_card(self, selected_tower):
         '''Decide which tower will be placed on the next left click'''
-        if isinstance(selected_tower, module_tower.Tower_Card):
+        if isinstance(selected_tower, module_tower.Tower_Info):
             self.__current_tower=selected_tower
             print(f"Locked onto the tower: {self.__current_tower.name}")
 
@@ -350,7 +347,7 @@ class Game:
     def create_tower(self, name, cost, color, damage, fire_rate, act_range, rect):
         if self.__current_tower==None:
             return
-        tower=module_tower.Tower_Manifested(name, cost, color, damage, fire_rate, act_range, rect)
+        tower=module_tower.Tower(name, cost, color, damage, fire_rate, act_range, rect)
         self.__towers.append(tower) #does this create a duplicate version of tower and would it affect anything?
         return tower
 
@@ -391,7 +388,6 @@ class Game:
             i_width=i.width
             i_y1=i.y1
             i_height=i.height
-            print(len(rect_list))
 
             if i_x1<cord_x<i_x1+i_width and i_y1<cord_y<i_y1+i_height:
                 return True
@@ -442,6 +438,20 @@ class Game:
                 closest_enemy=i
         return closest_enemy
 
+'''
+Buff:
+-Hidden
+-Lead
+-Swift
+-Aggro
+-Boss
+-Blessed
+->Buff can also stack
+Debuff:
+-Burn: Deal tick damage for however long
+-Freeze: 4 level: each -20% speed, at the 4th shot, stop completely for 0.5s
+-Stun: Just stop completely for certain time
+'''
 
 game = Game()
 game.create_game_loop()

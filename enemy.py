@@ -8,16 +8,68 @@ class Enemy(Interactable): #this is supposed to be abc
         super().__init__(Rect(canva, x1, y1, width, height, color))
         self.__name=name
         self.__reward=health
+        self.__initial_health=health
+        self.__initial_speed=speed
         self.__health=health
         self.__speed=speed
         self.__progress=0
         self.__distance_covered=0
-        self.__buff=None
-        self.__debuff=None 
+
+        '''Debuff'''
+        self.__freeze=0
+        self.__freeze_level=0
+
+        self.__burn=0
+        self.__burn_damage=0
+
+        self.__stun=0
+
+        self.__debuff=[]
         '''Buff and debuff is given during gameplay, not at spawn'''
 
         '''self.__progress is the index of the item in a list of path,
         each index point to a pair of x,y (corners)'''
+
+    @property
+    def freeze(self):
+        return self.__freeze
+    @freeze.setter
+    def freeze(self, value):
+        if isinstance(value, [int, float]):
+            self.__freeze=value
+
+    @property
+    def freeze_level(self):
+        return self.__freeze_level
+    @freeze_level.setter
+    def freeze_level(self, value):
+        if isinstance(value, int):
+            self.freeze_level=value
+
+    @property
+    def burn(self):
+        return self.__burn
+    @burn.setter
+    def burn(self, value):
+        if isinstance(value, [int, float]):
+            self.__burn=value
+
+    @property
+    def burn_damage(self):
+        return self.__burn_damage
+    @burn_damage.setter
+    def burn_damage(self,value):
+        if isinstance(value, [float, int]):
+            self.__burn_damage=value
+
+    @property
+    def stun(self):
+        return self.__stun
+    @stun.setter
+    def stun(self, value):
+        if isinstance(value, [int, float]):
+            self.__stun=value
+
     @property
     def name(self):
         return self.__name
@@ -120,6 +172,28 @@ class Enemy(Interactable): #this is supposed to be abc
                 y_reach=False
         return x_reach and y_reach
 
+    def debuff(self, delta_time):
+        if self.__burn!=0:
+            self.__health-=self.__burn_damage
+            self.__burn=max(0, self.__burn-delta_time)
+
+        if self.__freeze!=0:
+            if self.__freeze_level in [1,2,3]:
+                self.__speed-=(self.__speed*20*self.__freeze_level)/100
+                self.__freeze=max(0, self.__freeze-delta_time)
+            if self.__freeze_level == 4:
+                self.__stun=0.6
+                self.__freeze_level=0
+                self.__freeze=0
+        else:
+            self.__speed=self.__initial_speed
+
+        if self.__stun!=0:
+            self.__speed=0
+            self.__stun=max(0, self.__stun-delta_time)
+        else:
+            self.__speed=self.__initial_speed
+
     def delete(self):
         self.rect.delete()
         
@@ -156,22 +230,3 @@ class Enemy_Info:
     def height(self):
         return self.__height
 
-class Enemy_dictionary:
-    def __init__(self):
-        self.__dictionary={}
-
-    @property
-    def dictionary(self):
-        return self.__dictionary
-
-    def add(self, name, key, health, speed, color, width, height):
-        item=Enemy_Info(name, health, speed, color, width, height)
-        self.__dictionary[key]=item
-
-    def get(self, key):
-        return self.__dictionary[key]
-
-book=Enemy_dictionary()
-book.add("normal", 1, 10, 0.5, "green", 30, 30)
-book.add("swift", 2, 12, 1, "lime", 26, 26)
-book.add("heavy", 3, 60, 0.25, "black", 32, 32)

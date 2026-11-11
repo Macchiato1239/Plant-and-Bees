@@ -14,7 +14,7 @@ class Slot(Interactable):
 
     @tower.setter
     def tower(self, value):
-        if isinstance(value, module_tower.Tower_Card):
+        if isinstance(value, module_tower.Tower_Info):
             self.__tower=value
 
 
