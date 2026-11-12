@@ -2,7 +2,6 @@ import tkinter as tk
 class Window:
     def __init__(self):
         '''Creates a window and manages UI'''
-        # Space taken by towers
         self.__window_width = 1000
         self.__window_height = 700
         self.__bg_color = "white"
@@ -65,4 +64,3 @@ class Window:
     @property
     def canva(self):
         return self.__canva
-    

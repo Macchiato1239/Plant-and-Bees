@@ -1,5 +1,6 @@
 # Improvement
 1. Make states, pause
+2. Put everything in a golder
 2. Make game menu
 3. Implement upgrade
 4. Implement deleting towers

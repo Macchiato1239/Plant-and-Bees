@@ -90,8 +90,8 @@ class EnemyManager:
             if reached:
                 if current_enemy.progress == len(self.__path_points) - 1:
                     # === Check if that point reached is the base ===
+                    self.__base_damage += current_enemy.health
                     self.__active_enemies.remove(current_enemy)
-                    self.__base_damage+=current_enemy.health
                     current_enemy.delete()
 
                 else:

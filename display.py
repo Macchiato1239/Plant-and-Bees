@@ -12,7 +12,7 @@ class Display:
 
         # === Placement preview ===
         self.__range_circle = canvas.create_oval(
-            0, 0, 0, 0, fill="lightblue", outline="black", stipple="gray12", state="hidden")
+            0, 0, 0, 0, outline="black", stipple="gray12", state="hidden")
         self.__space_taken_rect = canvas.create_rectangle(
             0, 0, 0, 0, fill="orange", outline="black", stipple="gray12", state="hidden")
 
