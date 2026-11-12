@@ -1,6 +1,6 @@
 # Improvement
-1. Make farm
-2. Clean up
+1. Make states, pause
+2. Make game menu
 3. Implement upgrade
 4. Implement deleting towers
 4. Render projectile

@@ -31,6 +31,10 @@ class Enemy(Interactable): #this is supposed to be abc
         each index point to a pair of x,y (corners)'''
 
     @property
+    def initial_health(self):
+        return self.__inital_health
+
+    @property
     def freeze(self):
         return self.__freeze
     @freeze.setter

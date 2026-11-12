@@ -35,9 +35,9 @@ class Tower_Dictionary(Dictionary):
         elif type == "debuff":
             item=TowerInfo(name, cost, color, act_range, size, dps, debuff)
         elif type =="support":
-            item=TowerInfo(name, cost, color, act_range, size, support)
+            item=TowerInfo(name, cost, color, act_range, size, support=support)
         elif type =="income":
-            item=TowerInfo(name, cost, color, act_range, size, income)
+            item=TowerInfo(name, cost, color, act_range, size, income=income)
         self.dictionary[key]=[type,item]
 
     def get(self,key):
@@ -64,6 +64,7 @@ Ebook=Enemy_Dictionary()
 Ebook.add("normal", 1, 10, 0.5, "green", 30, 30)
 Ebook.add("swift", 2, 12, 1, "lime", 26, 26)
 Ebook.add("heavy", 3, 60, 0.25, "black", 32, 32)
+Ebook.add("Normal Boss", 4, 200, 0.5, "red", 35,35)
 
 Tbook=Tower_Dictionary()
 

@@ -206,9 +206,12 @@ class SupportTower(Tower):
         return self.__cost_boost
 
     @cost_boost.setter
-    def fire_rate_boost(self, value):
+    def cost_boost(self, value):
         if isinstance(value, (float, int)):
-            self.__fire_rate_boost=value
+            self.__cost_boost=value
+
+    def act(self):
+        return None
 
 class Farm(Tower):
     def __init__(self, TowerInfo, rect):
@@ -222,3 +225,6 @@ class Farm(Tower):
     def income(self, value):
         if isinstance(value, int):
             self.__income=value
+
+    def act(self):
+        return None

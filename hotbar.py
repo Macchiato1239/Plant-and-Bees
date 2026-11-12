@@ -14,7 +14,7 @@ class Slot(Interactable):
 
     @tower.setter
     def tower(self, value):
-        if isinstance(value, int):
+        if value is None or isinstance(value, int):
             self.__tower=value
 
 
