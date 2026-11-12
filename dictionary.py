@@ -68,6 +68,6 @@ Ebook.add("heavy", 3, 60, 0.25, "black", 32, 32)
 Tbook=Tower_Dictionary()
 
 Tbook.add(type="dps", key=1, name="soldier", cost=200, color="red", act_range=200, size=20, dps=DpsStats(5, 0.5))
-Tbook.add(type="debuff", key=2, name="freezer", cost=200, color="blue", act_range=200, size=20, dps=DpsStats(5, 0.5), debuff=DebuffStats(EffectType.FROZEN,1,0.2))
+Tbook.add(type="debuff", key=2, name="freezer", cost=200, color="blue", act_range=200, size=20, dps=DpsStats(5, 0.8), debuff=DebuffStats(EffectType.FROZEN,1,0.2))
 Tbook.add(type="dps", key=3, name="minigunner", cost=400, color="pink", act_range=300, size=25, dps=DpsStats(7,0.25))
 Tbook.add(type="income", key=4, name="farm", cost=200, color="yellow", act_range=10, size=20, income=IncomeStats(100))

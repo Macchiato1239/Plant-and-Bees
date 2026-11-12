@@ -42,6 +42,10 @@ class Game:
         self.__mode_progress=0
         self.__time_til_next_spawn=0
         self.__time_since_last_spawn=0
+        self.__range_circle=self.__canva.create_oval(0,0,0,0, fill="orange",
+                                                      outline="black",
+                                                        stipple="gray25",
+                                                        state="hidden")
         
         '''UI'''
         self.__money_display=self.__canva.create_text(
@@ -105,6 +109,8 @@ class Game:
         self.__window.bind("<KeyPress>", self.on_key_press)
         self.__window.bind("<KeyPress>", self.cancel_selection, add="+")
         self.__window.bind("<Button-1>", self.interact_with_ui)
+        self.__canva.bind("<Motion>", self.mouse_coordinate)
+        self.__canva.bind("<Motion>", self.track_display_range)
 
         for i in range(self.__max_towers):
             slot=self.create_hotbar_slot(i+1, self.__empty_slot_color)
@@ -239,7 +245,6 @@ class Game:
                     continue
                 final_target.health-=damage
                 if isinstance(tower, DebuffTower):
-                    print(f"tower type: ", tower.type)
                     if tower.type==EffectType.FROZEN:
                         final_target.freeze=tower.duration
                         final_target.freeze_level+=tower.magnitude
@@ -267,7 +272,7 @@ class Game:
         if self.__mode_progress!=-1:
             self.__canva.itemconfig(
                 self.__wave_display,
-                text=f"Wave {self.__mode_progress+1}"
+                text=f"Wave {self.__mode_progress+1}/{len(self.__mode)}"
             )
         '''Deleting dead enemies'''
         for i in self.__active_enemies[:]:
@@ -281,6 +286,33 @@ class Game:
 
 
 
+    def mouse_coordinate(self, event):
+        '''Constantly return mouse's coordinate'''
+        cord_x=event.x
+        cord_y=event.y
+        print(cord_x, cord_y)
+        return cord_x,cord_y
+    
+    def update_display_range(self, cord_x, cord_y):
+        '''Constantly display the range of the selected tower if exists'''
+        tower_range=Tbook.get(self.__current_tower).act_range
+        x1=cord_x-tower_range/2
+        y1=cord_y-tower_range/2
+        x2=cord_x+tower_range/2
+        y2=cord_y+tower_range/2
+        
+        self.__canva.coords(self.__range_circle, x1,y1,x2,y2)
+
+    def track_display_range(self, event):
+        if not self.__current_tower:
+            self.__canva.itemconfigure(self.__range_circle, state="hidden")
+            return
+        self.__canva.itemconfigure(self.__range_circle, state="normal")
+
+        cord_x,cord_y=self.mouse_coordinate(event)
+        self.update_display_range(cord_x, cord_y)
+
+    
     def on_key_press(self, event): #Shutting down the game
         if event.keysym == "q":
             self.__running = False
