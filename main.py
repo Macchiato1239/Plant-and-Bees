@@ -42,8 +42,12 @@ class Game:
         self.__mode_progress=0
         self.__time_til_next_spawn=0
         self.__time_since_last_spawn=0
-        self.__range_circle=self.__canva.create_oval(0,0,0,0, fill="orange",
+        self.__range_circle=self.__canva.create_oval(0,0,0,0, fill="lightblue",
                                                       outline="black",
+                                                        stipple="gray25",
+                                                        state="hidden")
+        self.__space_taken_rect=self.__canva.create_rectangle(0,0,0,0, fill="orange",
+                                                        outline="black",
                                                         stipple="gray25",
                                                         state="hidden")
         
@@ -143,11 +147,11 @@ class Game:
             self.__taken.append(path.rect)
 
         '''Enemy'''
-        wave1=[[[1,0.5]]*4+[[1,0]]]
-        wave2=[[[1,0.5]]*6+[[1,0]]]
-        wave3=[[[2,0.3]]*2+[[2,1]]+[[1,0.5]]*4]
-        wave4=[[[2,0.3]]+[[2,0.5]]+[[3,0.8]]*5]
-        self.__mode+=wave1+wave2+wave3+wave4
+        wave1=[[1,0.5]]*4+[[1,0]]
+        wave2=[[1,0.5]]*6+[[1,0]]
+        wave3=[[2,0.3]]*2+[[2,1]]+[[1,0.5]]*4
+        wave4=[[2,0.3]]+[[2,0.5]]+[[3,0.8]]*5
+        self.__mode+=[wave1]+[wave2]+[wave3]+[wave4]
 
         # zombie=enemy.Enemy_Info(10, 0.5, "green", 30, 30)
         # self.spawn(zombie)
@@ -191,7 +195,9 @@ class Game:
                 self.__time_since_last_spawn=0
 
         '''Check if the enemy in this wave is dead before going to the next wave'''
-        if not self.__active_enemies and self.__mode_progress!=-1:
+        print(len(self.__mode[self.__mode_progress]))
+        print
+        if not self.__active_enemies and self.__mode_progress!=-1 and self.__wave_progress==-1:
             self.__wave_progress=0
             self.__mode_progress+=1
             if self.__mode_progress==len(self.__mode):
@@ -290,27 +296,39 @@ class Game:
         '''Constantly return mouse's coordinate'''
         cord_x=event.x
         cord_y=event.y
-        print(cord_x, cord_y)
         return cord_x,cord_y
     
     def update_display_range(self, cord_x, cord_y):
         '''Constantly display the range of the selected tower if exists'''
-        tower_range=Tbook.get(self.__current_tower).act_range
+        tower_info=Tbook.get(self.__current_tower)
+        tower_range=tower_info.act_range
+        tower_size=tower_info.size
         x1=cord_x-tower_range/2
         y1=cord_y-tower_range/2
         x2=cord_x+tower_range/2
         y2=cord_y+tower_range/2
+
+        space_x1=cord_x-tower_size
+        space_y1=cord_y-tower_size
+        space_x2=cord_x+tower_size
+        space_y2=cord_y+tower_size
+
+
         
         self.__canva.coords(self.__range_circle, x1,y1,x2,y2)
+        self.__canva.coords(self.__space_taken_rect, space_x1, space_y1, space_x2, space_y2)
 
     def track_display_range(self, event):
         if not self.__current_tower:
             self.__canva.itemconfigure(self.__range_circle, state="hidden")
+            self.__canva.itemconfigure(self.__space_taken_rect, state="hidden")
             return
         self.__canva.itemconfigure(self.__range_circle, state="normal")
+        self.__canva.itemconfigure(self.__space_taken_rect, state="normal")
 
         cord_x,cord_y=self.mouse_coordinate(event)
         self.update_display_range(cord_x, cord_y)
+
 
     
     def on_key_press(self, event): #Shutting down the game
