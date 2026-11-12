@@ -1,7 +1,7 @@
-from module_window import Window
-from gameflow import GameFlow
-from pause import PausedState
-from states import State
+from Head.module_window import Window
+from Head.states import State
+from States.gameflow import GameFlow
+from States.pause import PausedState
 class Game:
     def __init__(self):
         self.__window_object=Window()

@@ -1,9 +1,8 @@
-from rect import Rect
-from interactable import Interactable
+from Base.interactable import Interactable
 import time
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
-from debuff import EffectType
+from Base.debuff import EffectType
 @dataclass(frozen=True)
 class DpsStats:
     damage: float | int 

@@ -1,6 +1,6 @@
 from dictionary import Tbook
-from module_tower import DebuffTower, DpsTower, EffectType, Farm, SupportTower
-from rect import Rect
+from Base.module_tower import DebuffTower, DpsTower, EffectType, Farm, SupportTower
+from Base.rect import Rect
 
 
 class TowerManager:

@@ -1,5 +1,5 @@
-from rect import Rect
-from interactable import Interactable
+from Base.rect import Rect
+from Base.interactable import Interactable
 from abc import ABC, abstractmethod
 class Enemy(Interactable): #this is supposed to be abc
     def __init__(self, canva, name, x1, y1, width, height, health, speed, color): 

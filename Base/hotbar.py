@@ -1,6 +1,4 @@
-from rect import Rect
-import module_tower
-from interactable import Interactable
+from Base.interactable import Interactable
 
 class Slot(Interactable):
     def __init__(self, rect, tower=None):

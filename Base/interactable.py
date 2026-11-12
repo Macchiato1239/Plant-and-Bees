@@ -1,4 +1,4 @@
-from rect import Rect
+from Base.rect import Rect
 from abc import ABC, abstractmethod
 class Interactable(ABC):
     def __init__(self, rect):

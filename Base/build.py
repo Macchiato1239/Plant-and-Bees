@@ -1,5 +1,5 @@
-from rect import Rect
-from interactable import Interactable
+from Base.rect import Rect
+from Base.interactable import Interactable
 from abc import ABC, abstractmethod
 class Spawn(Interactable):
     def __init__(self, canva, x, y):

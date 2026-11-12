@@ -1,4 +1,4 @@
-from build import Base, Path, Spawn
+from Base.build import Base, Path, Spawn
 
 class Buildings:
     '''Manage the spawn, base, and path geometry for a game map.'''

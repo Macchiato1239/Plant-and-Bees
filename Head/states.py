@@ -1,6 +1,5 @@
 from enum import Enum, auto
 from abc import ABC, abstractmethod
-from module_window import Window
 class State(Enum):
     MENU = auto()
     PLAYING = auto()

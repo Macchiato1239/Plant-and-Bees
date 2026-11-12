@@ -1,5 +1,5 @@
 from dictionary import Ebook
-from enemy import Enemy
+from Base.enemy import Enemy
 
 
 class EnemyManager:

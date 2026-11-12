@@ -1,6 +1,6 @@
-from enemy import Enemy, Enemy_Info
-from module_tower import TowerInfo, Tower, EffectType, DpsStats, DebuffStats, IncomeStats, SupportStats
-from module_tower import DpsTower, DebuffTower, Farm, SupportTower
+from Base.enemy import Enemy, Enemy_Info
+from Base.module_tower import TowerInfo, Tower, EffectType, DpsStats, DebuffStats, IncomeStats, SupportStats
+from Base.module_tower import DpsTower, DebuffTower, Farm, SupportTower
 from abc import ABC, abstractmethod
 class Dictionary(ABC):
     def __init__(self):

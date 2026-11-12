@@ -1,5 +1,5 @@
-from hotbar import Slot
-from rect import Rect
+from Base.hotbar import Slot
+from Base.rect import Rect
 
 
 class HotBarManager:

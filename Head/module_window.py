@@ -37,7 +37,7 @@ class Window:
     @window_height.setter
     def window_height(self, value):
         if isinstance(value, int):
-            self.__window_height=value
+            self.__window_height = value
 
     @property
     def bg_color(self):
@@ -46,7 +46,7 @@ class Window:
     @bg_color.setter
     def bg_color(self, value):
         if isinstance(value, str):
-            self.__bg_color=value
+            self.__bg_color = value
 
     @property
     def window(self):
@@ -59,7 +59,7 @@ class Window:
     @running.setter
     def running(self, value):
         if isinstance(value, bool):
-            self.__running=value
+            self.__running = value
 
     @property
     def canva(self):

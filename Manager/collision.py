@@ -1,5 +1,5 @@
 import math
-from rect import Rect
+from Base.rect import Rect
 class CollisionManager:
     def __init__(self):
         self.__interactive = []

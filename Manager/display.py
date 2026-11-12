@@ -4,17 +4,17 @@ class Display:
         self.__canvas = canvas
         # === Stats display ===
         self.__money_display = canvas.create_text(
-            100, 50, text=f"Cash: {money}", font=("Arial", 24), fill="green")
+            100, 50, text = f"Cash: {money}", font=("Arial", 24), fill="green")
         self.__health_display = canvas.create_text(
-            500, 50, text=f"Health: {health}", font=("Arial", 24), fill="red")
+            500, 50, text = f"Health: {health}", font=("Arial", 24), fill="red")
         self.__wave_display = canvas.create_text(
-            700, 50, text=f"Wave {wave}", font=("Arial", 20), fill="black")
+            700, 50, text = f"Wave {wave}", font=("Arial", 20), fill="black")
 
         # === Placement preview ===
         self.__range_circle = canvas.create_oval(
-            0, 0, 0, 0, outline="black", stipple="gray12", state="hidden")
+            0, 0, 0, 0, outline = "black", stipple="gray12", state="hidden")
         self.__space_taken_rect = canvas.create_rectangle(
-            0, 0, 0, 0, fill="orange", outline="black", stipple="gray12", state="hidden")
+            0, 0, 0, 0, fill = "orange", outline="black", stipple="gray12", state="hidden")
 
     @property
     def money_display(self):

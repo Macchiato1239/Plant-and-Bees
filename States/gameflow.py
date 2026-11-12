@@ -1,14 +1,13 @@
 import time
 import tkinter as tk
-from states import GameState
-from display import Display
-from buildings import Buildings
-from collision import CollisionManager
-from enemymanager import EnemyManager
-from hotbarmanager import HotBarManager
-from module_window import Window
-from mouseevent import MouseHandler
-from towermanager import TowerManager
+from Head.states import GameState
+from Base.buildings import Buildings
+from Manager.collision import CollisionManager
+from Manager.display import Display
+from Manager.enemymanager import EnemyManager
+from Manager.hotbarmanager import HotBarManager
+from Manager.mouseevent import MouseHandler
+from Manager.towermanager import TowerManager
 
 
 class GameFlow(GameState):
