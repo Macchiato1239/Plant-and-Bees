@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import tkinter as tk
 
 class Rect():
-    def __init__(self, canva, x1, y1, width, height, fill="brown", outline=None):
+    def __init__(self, canva, x1, y1, width, height, fill="brown", outline="#613c01", border_width=1):
         self.__x1=x1
         self.__y1=y1
         self.__width=width
@@ -10,7 +10,13 @@ class Rect():
         self.__fill=fill
         self.__canva=canva
         self.__outline=outline
-        self.__rect_id=canva.create_rectangle(self.__x1, self.__y1, self.__x1+self.__width, self.__y1+self.__height, fill=self.__fill, outline=self.__outline)
+        self.__rect_id=canva.create_rectangle(self.__x1,
+                                            self.__y1,
+                                            self.__x1+self.__width,
+                                            self.__y1+self.__height,
+                                            fill=self.__fill,
+                                            outline=self.__outline,
+                                            width=border_width)
 
 
     def cord_overlap_check(self, x, y):

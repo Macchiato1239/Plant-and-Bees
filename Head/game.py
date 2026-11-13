@@ -116,7 +116,7 @@ class Game:
         self.__window.mainloop()
 
     def quit(self, event):
-        if event.keysym.lower() == "q":
+        if event.keysym.lower() == "s":
             # === Quit the game ===
             self.__window.destroy()
 

@@ -167,17 +167,25 @@ class GameFlow(GameState):
                 self.__towers.select_tower_card(item.tower)
                 return
 
-        if self.__collision.compare_cord_rect(x, y, self.__collision.taken):
+        # A click used to place a tower should not also investigate it.
+        # Keep placement mode active after invalid placements so the player
+        # can choose another spot.
+        if self.__towers.current_tower is not None:
+            placed, remaining_money = self.__towers.place_tower(x, y, self.__money)
+            if placed:
+                self.__money = remaining_money
             return
 
-        placed, remaining_money = self.__towers.place_tower(x, y, self.__money)
-        if placed:
-            self.__money = remaining_money
+        self.__towers.investigate_tower(event)
+
+
 
     def handle_key(self, event):
-        if event.keysym.lower() == "x":
+        if event.keysym.lower() == "q":
             # === Stop selecting the selected tower ===
             self.__towers.cancel_selection()
+        if event.keysym.lower() == "x":
+            self.__towers.delete_tower()
 
     def update_range_display(self, event):
         tower_info = self.__towers.selected_tower_info

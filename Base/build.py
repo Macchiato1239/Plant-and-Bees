@@ -5,7 +5,7 @@ class Spawn(Interactable):
     def __init__(self, canva, x, y):
         self.__width=25
         self.__height=25
-        self.__color="blue"
+        self.__color="#2b1b00"
         super().__init__(Rect(canva, x-self.__width, y-self.__height, self.__width*2, self.__height*2, self.__color))
 
 
@@ -13,7 +13,7 @@ class Base(Interactable):
     def __init__(self, canva, health, x, y):
         self.__width=25
         self.__height=25
-        self.__color="purple"
+        self.__color="#2c919d"
         super().__init__(Rect(canva, x-self.__width, y-self.__width, self.__width*2, self.__height*2, self.__color))
         self.__health=health
 
@@ -45,7 +45,7 @@ class Path(Interactable):
         y1=min(start_y, end_y)-self.__path_width
         width=self.__path_width*2 + abs(start_x-end_x)
         height=self.__path_width*2 + abs(start_y-end_y)
-        path=Rect(canva, x1, y1, width, height, "#ba7f20")
+        path=Rect(canva, x1, y1, width, height, fill="#ba7f20", outline="#6b4405", border_width=3)
         super().__init__(path)
 
     @property

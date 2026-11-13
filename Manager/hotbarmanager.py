@@ -1,7 +1,4 @@
 from Base.hotbar import Slot
-from Base.rect import Rect
-
-
 class HotBarManager:
     '''Create and manage the tower selection slots.'''
     def __init__(self, canvas, collision):
@@ -13,9 +10,9 @@ class HotBarManager:
         self.__slot_x1 = 50
         self.__slot_y1 = 550
         self.__slot_width = 130
-        self.__slot_height = 700
+        self.__slot_height = 170
         self.__empty_slot_color = "black"
-        self.__filled_slot_color = "red"
+        self.__filled_slot_color = "#bd7e1a"
 
     @property
     def hotbar(self):
@@ -30,10 +27,12 @@ class HotBarManager:
         if self.__hotbar:
             return
         for index in range(self.__slot_count):
-            x1 = self.__slot_x1 + (self.__slot_width + 50) * index
-            rect = Rect(self.__canvas, x1, self.__slot_y1, self.__slot_width,
-                        self.__slot_height, self.__empty_slot_color)
-            slot = Slot(rect)
+            x = self.__slot_x1 + self.__slot_width / 2 + (self.__slot_width + 50) * index
+            y = self.__slot_y1 + self.__slot_height / 2
+            slot = Slot(
+                self.__canvas, x, y, self.__slot_width, self.__slot_height,
+                fill=self.__empty_slot_color
+            )
             self.__hotbar[index] = slot
             self.__collision.interactive.append(slot)
 

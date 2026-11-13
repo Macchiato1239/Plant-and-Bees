@@ -28,3 +28,6 @@ class Interactable(ABC):
     def cord_y(self, value):
         if isinstance(value, (int,float)):
             self.__rect.y1=value
+
+    def delete(self):
+        self.rect.delete()

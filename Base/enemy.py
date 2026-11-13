@@ -195,9 +195,6 @@ class Enemy(Interactable): #this is supposed to be abc
             self.__stun=max(0, self.__stun-delta_time)
         if self.__stun==0 and self.__freeze==0:
             self.__speed=self.__initial_speed
-
-    def delete(self):
-        self.rect.delete()
         
 
 class Enemy_Info:
