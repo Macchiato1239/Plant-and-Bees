@@ -13,15 +13,11 @@ class CollisionManager:
 
     @interactive.setter
     def interactive(self, value):
-        self.__interactive = value
+        self.__interactive=value
 
     @property
     def taken(self):
         return self.__taken
-
-    @taken.setter
-    def taken(self, value):
-        self.__taken = value
 
     def compare_cord_rect(self, cord_x, cord_y, rect_list):
         '''Check whether a coordinate is within a rectangle'''

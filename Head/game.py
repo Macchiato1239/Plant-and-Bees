@@ -2,17 +2,43 @@ from Head.module_window import Window
 from Head.states import State
 from States.gameflow import GameFlow
 from States.pause import PausedState
+from States.menu import MenuState
 class Game:
     def __init__(self):
         self.__window_object=Window()
         self.__window=self.__window_object.window
         # === Pass this to the other states ===
-        self.__state=State.PLAYING
-        self.__game=GameFlow(self.__window_object) #To be executed while state is playing
+        self.__state=State.MENU
+        self.__game=None #To be executed while state is playing
         self.__pause=PausedState(self.__window_object) #To be executed while state is paused
-        self.__window.bind("<KeyPress>", self.change_state, add="+")
+        self.__menu=MenuState(self.__window_object)
+        self.__window.bind("<KeyPress>", self.toggle_pause, add="+")
+        self.__window.bind("<Button-1>", self.menu_handler, add="+")
 
-    def change_state(self, event):
+
+    def menu_handler(self, event):
+        action=self.__menu.handle_click(event)
+        if action == None:
+            return
+        if action == "play":
+            difficulty=self.__menu.difficulty
+            self.__state=State.PLAYING
+            self.__menu.exit()
+            self.__game=GameFlow(self.__window_object, difficulty)
+            self.__game.create_game_loop()
+
+        elif action == "difficulty":
+            self.__menu.cycle_difficulty()
+
+        elif action == "quit":
+            self.__window.destroy()
+
+    def process_state(self):
+        if self.__state==State.MENU:
+            self.__menu.enter()
+
+
+    def toggle_pause(self, event):
         # === Pause the game ===
         key = event.keysym.lower()
         if key == "r" and self.__state == State.PLAYING:
@@ -29,7 +55,9 @@ class Game:
 
 
     def start(self):
-        self.__game.create_game_loop()
+        self.__window_object.create_window()
+        self.__menu.enter()
+        self.__window.mainloop()
 
 
         

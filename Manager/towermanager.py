@@ -50,7 +50,7 @@ class TowerManager:
 
         if len(self.__active_towers)==self.__max_active_towers:
             # === Check if the number of towers has hit the limit
-            return
+            return False, money
 
         tower_info = Tbook.get(self.__current_tower)
         if money < tower_info.cost:

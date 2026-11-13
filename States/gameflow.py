@@ -12,7 +12,7 @@ from Manager.towermanager import TowerManager
 
 class GameFlow(GameState):
     '''Create the game and coordinate its frame-by-frame flow.'''
-    def __init__(self, window):
+    def __init__(self, window, difficulty):
         super().__init__(window)
         canvas = self.window.canva
         self.__paused=False
@@ -34,8 +34,8 @@ class GameFlow(GameState):
 
         self.__hotbar = HotBarManager(canvas, self.__collision)
         self.__towers = TowerManager(canvas, self.__collision)
-        self.__enemies = EnemyManager(canvas, self.__buildings.spawn, self.__buildings.path_points)
-        self.__display = Display(canvas, self.__money, self.__base_health, len(self.__enemies.mode))
+        self.__enemies = EnemyManager(canvas, difficulty, self.__buildings.spawn, self.__buildings.path_points)
+        self.__display = Display(canvas, self.__money, self.__base_health, len(self.__enemies.game_info))
         self.__mouse_handler = MouseHandler(self)
 
     def enter(self):
@@ -46,8 +46,6 @@ class GameFlow(GameState):
         self.__paused = True
 
     def create_game_loop(self):
-        self.window.create_window()
-
         # === Create slots ===
         self.__hotbar.create_slots()
         # === Equip towers ===
@@ -58,7 +56,7 @@ class GameFlow(GameState):
 
         # === Bind input events to corressponding functions ===
         self.window.window.bind("<KeyPress>", self.__mouse_handler.on_key_press, add="+")
-        self.window.window.bind("<Button-1>", self.__mouse_handler.interact_with_ui)
+        self.window.window.bind("<Button-1>", self.__mouse_handler.interact_with_ui, add="+")
         self.window.canva.bind("<Motion>", self.__mouse_handler.track_display_range)
 
         # === Render the base and spawn on top of everything ===
@@ -67,8 +65,6 @@ class GameFlow(GameState):
 
         # === Immediately trigger game loop ===
         self.game_loop()
-        # === Trigger tkinter main event loop that processes input events ===
-        self.window.window.mainloop()
 
     def game_loop(self):
         if not self.window.running:

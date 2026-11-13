@@ -1,29 +1,27 @@
 from dictionary import Ebook
 from Base.enemy import Enemy
-
+from Manager.difficulty import diff
 
 class EnemyManager:
     '''Spawn waves and update enemy movement, effects, deaths, and base damage.'''
 
-    def __init__(self, canvas, spawn, path_points):
+    def __init__(self, canvas, difficulty_level, spawn, path_points):
         self.__canvas = canvas
-
         self.__spawn = spawn
         self.__path_points = path_points
         self.__active_enemies = []
         self.__time_til_next_spawn = 0
         self.__time_since_last_spawn = 0
         self.__wave_progress = 0
-        self.__mode_progress = 0
+        self.__game_progress = 0
         self.__base_damage = 0
+
+        if difficulty_level==1:
+            self.__game_info=diff.get("normal")
+        elif difficulty_level==2:
+            self.__game_info=diff.get("hard")
+
         # ===A map containing enemy id, time before spawning the next enemy===
-        self.__mode = [
-            [[1, 0.5]] * 4 + [[1, 0]],
-            [[1, 0.5]] * 6 + [[1, 0]],
-            [[2, 0.3]] * 2 + [[2, 1]] + [[1, 0.5]] * 4,
-            [[2, 0.3]] + [[2, 0.5]] + [[3, 0.8]] * 5,
-            [[4, 1]] * 5,
-        ]
 
 
     @property
@@ -39,31 +37,31 @@ class EnemyManager:
         return self.__active_enemies
 
     @property
-    def mode(self):
-        return self.__mode
+    def game_info(self):
+        return self.__game_info
 
     @property
     def display_wave(self):
         '''Display current wave number'''
-        if self.__mode_progress < 0:
-            return f"Wave {len(self.__mode)}/{len(self.__mode)}"
-        return f"Wave {self.__mode_progress + 1}/{len(self.__mode)}"
+        if self.__game_progress < 0:
+            return f"Wave {len(self.__game_info)}/{len(self.__game_info)}"
+        return f"Wave {self.__game_progress + 1}/{len(self.__game_info)}"
 
     def update(self, delta_time, canvas):
         # === Get delta time ===
         self.__time_since_last_spawn += delta_time
 
         # === Processing waves ===
-        if self.__mode_progress != -1 and self.__wave_progress != -1:
+        if self.__game_progress != -1 and self.__wave_progress != -1:
             # === If there are still waves and unsummoned enemies ===
             if self.__time_since_last_spawn >= self.__time_til_next_spawn:
                 # === Enough time has passed to spawn the next enemy ===
-                enemy_id, delay = self.__mode[self.__mode_progress][self.__wave_progress]
+                enemy_id, delay = self.__game_info[self.__game_progress][self.__wave_progress]
                 self.spawn(Ebook.get(enemy_id))
                 self.__time_til_next_spawn = delay
                 self.__time_since_last_spawn = 0
 
-                if self.__wave_progress == len(self.__mode[self.__mode_progress]) - 1:
+                if self.__wave_progress == len(self.__game_info[self.__game_progress]) - 1:
                     # === Check if current wave is last ===
                     self.__wave_progress = -1
                 else:
@@ -98,16 +96,16 @@ class EnemyManager:
                     # === Keep advancing if not ===
                     current_enemy.progress += 1
 
-        if (not self.__active_enemies and self.__mode_progress != -1
+        if (not self.__active_enemies and self.__game_progress != -1
             and self.__wave_progress == -1):
             # === Condition to move to next wave: 
             # All enemies have been spawned and died
             # The current wave is not the last ===
 
             self.__wave_progress = 0
-            self.__mode_progress += 1
-            if self.__mode_progress >= len(self.__mode):
-                self.__mode_progress = -1
+            self.__game_progress += 1
+            if self.__game_progress >= len(self.__game_info):
+                self.__game_progress = -1
         return reward
 
     def spawn(self, enemy_info):
