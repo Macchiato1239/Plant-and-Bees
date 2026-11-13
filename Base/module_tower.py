@@ -19,13 +19,6 @@ class IncomeStats:
     income: int
 
 @dataclass(frozen=True)
-class SupportStats:
-    fire_rate: float | int
-    cost: int
-    act_range: float | int
-    damage: float | int
-
-@dataclass(frozen=True)
 class TowerInfo():
     '''Contains the information about the default stats and abilities of the tower'''
     name: str
@@ -37,8 +30,6 @@ class TowerInfo():
     dps: DpsStats | None=None
     debuff: DebuffStats | None=None
     income: IncomeStats | None=None
-    support: SupportStats | None=None
-
 
 class Tower(Interactable, ABC): 
     '''Tower_Manifested are the towers that are placed down, therefore a manifestation of the info card'''

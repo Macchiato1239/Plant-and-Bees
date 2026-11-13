@@ -45,7 +45,7 @@ class Path(Interactable):
         y1=min(start_y, end_y)-self.__path_width
         width=self.__path_width*2 + abs(start_x-end_x)
         height=self.__path_width*2 + abs(start_y-end_y)
-        path=Rect(canva, x1, y1, width, height, "grey")
+        path=Rect(canva, x1, y1, width, height, "#ba7f20")
         super().__init__(path)
 
     @property

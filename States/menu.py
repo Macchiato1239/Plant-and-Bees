@@ -11,13 +11,13 @@ class MenuState(GameState):
         self.__collision=CollisionManager()
 
         # === Play Button ===
-        self.__play_button=Button(self.__canvas, 500, 250, 150, 50, "Play")
+        self.__play_button=Button(self.__canvas, 500, 220, 200, 60, "Play")
 
         # === Difficulty Buttion ===
-        self.__difficulty_button=Button(self.__canvas, 500, 310, 150, 50, "Difficulty: Normal")
+        self.__difficulty_button=Button(self.__canvas, 500, 310, 200, 60, "Difficulty: Normal")
 
         # === Quit Button ===
-        self.__quit_button=Button(self.__canvas, 500, 370, 150, 50, "Quit")
+        self.__quit_button=Button(self.__canvas, 500, 400, 200, 60, "Quit")
 
 
     def enter(self):

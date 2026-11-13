@@ -1,5 +1,6 @@
 from dictionary import Tbook
 from Base.module_tower import DebuffTower, DpsTower, EffectType, Farm
+from Base.projectile import Projectile
 from Base.rect import Rect
 
 
@@ -10,6 +11,7 @@ class TowerManager:
         self.__canvas = canvas
         self.__collision = collision
         self.__active_towers = []
+        self.__projectiles = []
         self.__max_active_towers=20
         # === list of towers placed on the map
         self.__current_tower = None
@@ -84,8 +86,13 @@ class TowerManager:
         self.cancel_selection()
         return True, money - tower.cost
 
-    def update(self, enemies, collision):
+    def update(self, enemies, collision, delta_time):
         ''''''
+        for projectile in self.__projectiles[:]:
+            if projectile.update(delta_time):
+                projectile.destroy()
+                self.__projectiles.remove(projectile)
+
         for tower in self.__active_towers:
             if not isinstance(tower, DpsTower):
                 if isinstance(tower, Farm):
@@ -102,6 +109,11 @@ class TowerManager:
             if target == 0:
             # === None in range ===
                 continue
+            start = (tower.rect.cord_x, tower.rect.cord_y)
+            destination = (target.rect.cord_x, target.rect.cord_y)
+            self.__projectiles.append(
+                Projectile(self.__canvas, start, destination)
+            )
             target.health -= damage
             if isinstance(tower, DebuffTower) and tower.type == EffectType.FROZEN:
                 # === Apply freeze debuff ===

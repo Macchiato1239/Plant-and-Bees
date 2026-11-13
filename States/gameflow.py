@@ -132,7 +132,9 @@ class GameFlow(GameState):
             self.__base_health = max(0, self.__base_health - self.__enemies.base_damage)
 
             # === Process tower actions ===
-            self.__towers.update(self.__enemies.active_enemies, self.__collision)
+            self.__towers.update(
+                self.__enemies.active_enemies, self.__collision, delta_time
+            )
             
             # === Amount of money gained from farms per wave ===
             completed = self.__enemies.completed_waves

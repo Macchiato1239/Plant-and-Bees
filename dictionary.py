@@ -1,6 +1,6 @@
 from Base.enemy import Enemy, Enemy_Info
-from Base.module_tower import TowerInfo, Tower, EffectType, DpsStats, DebuffStats, IncomeStats, SupportStats
-from Base.module_tower import DpsTower, DebuffTower, Farm, SupportTower
+from Base.module_tower import TowerInfo, Tower, EffectType, DpsStats, DebuffStats, IncomeStats
+from Base.module_tower import DpsTower, DebuffTower, Farm
 from abc import ABC, abstractmethod
 class Dictionary(ABC):
     def __init__(self):
@@ -34,8 +34,6 @@ class Tower_Dictionary(Dictionary):
             item=TowerInfo(name, cost, color, act_range, size, dps)
         elif type == "debuff":
             item=TowerInfo(name, cost, color, act_range, size, dps, debuff)
-        elif type =="support":
-            item=TowerInfo(name, cost, color, act_range, size, support=support)
         elif type =="income":
             item=TowerInfo(name, cost, color, act_range, size, income=income)
         self.dictionary[key]=[type,item]
@@ -53,8 +51,6 @@ class Tower_Dictionary(Dictionary):
             tower=DpsTower(tower_info, rect)
         elif tower_type=="debuff":
             tower=DebuffTower(tower_info, rect)
-        elif tower_type=="support":
-            tower=SupportTower(tower_info, rect)
         elif tower_type=="income":
             tower=Farm(tower_info, rect)
         return tower
@@ -70,5 +66,5 @@ Tbook=Tower_Dictionary()
 
 Tbook.add(type="dps", key=1, name="soldier", cost=200, color="red", act_range=200, size=20, dps=DpsStats(100, 0.5))
 Tbook.add(type="debuff", key=2, name="freezer", cost=200, color="blue", act_range=200, size=20, dps=DpsStats(5, 0.8), debuff=DebuffStats(EffectType.FROZEN,1,0.2))
-Tbook.add(type="dps", key=3, name="minigunner", cost=400, color="pink", act_range=300, size=25, dps=DpsStats(7,0.25))
+Tbook.add(type="dps", key=3, name="minigunner", cost=400, color="pink", act_range=300, size=25, dps=DpsStats(5,0.1))
 Tbook.add(type="income", key=4, name="farm", cost=200, color="yellow", act_range=10, size=20, income=IncomeStats(100))

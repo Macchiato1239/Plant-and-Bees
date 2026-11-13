@@ -27,15 +27,15 @@ class GameOverState(GameState):
         self.__resume_button = None
         if include_resume:
             self.__resume_button = Button(
-                self.__canvas, center_x, center_y - 35, 180, 45, "Resume"
+                self.__canvas, center_x, center_y - 35, 200, 60, "Resume"
             )
         self.__menu_button = Button(
             self.__canvas, center_x, center_y + (25 if include_resume else 0),
-            180, 45, "Main Menu"
+            200, 60, "Main Menu"
         )
         self.__restart_button = Button(
             self.__canvas, center_x, center_y + (85 if include_resume else 65),
-            180, 45, "Restart"
+            200, 60, "Restart"
         )
         self.__collision = CollisionManager()
 

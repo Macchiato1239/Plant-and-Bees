@@ -4,7 +4,7 @@ class Window:
         '''Creates a window and manages UI'''
         self.__window_width = 1000
         self.__window_height = 700
-        self.__bg_color = "white"
+        self.__bg_color = "#a0de81"
         self.__window = tk.Tk()
         self.__running = True
         self.__canva = tk.Canvas(
