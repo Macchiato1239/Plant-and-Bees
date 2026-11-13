@@ -24,6 +24,10 @@ class EnemyManager:
         # ===A map containing enemy id, time before spawning the next enemy===
 
 
+    @property 
+    def is_complete(self):
+        return self.__game_progress == -1 and not self.__active_enemies
+    
     @property
     def base_damage(self):
         return self.__base_damage

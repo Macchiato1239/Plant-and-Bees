@@ -1,6 +1,6 @@
 import time
 import tkinter as tk
-from Head.states import GameState
+from Head.states import GameState, State
 from Base.buildings import Buildings
 from Manager.collision import CollisionManager
 from Manager.display import Display
@@ -12,8 +12,9 @@ from Manager.towermanager import TowerManager
 
 class GameFlow(GameState):
     '''Create the game and coordinate its frame-by-frame flow.'''
-    def __init__(self, window, difficulty):
+    def __init__(self, window, difficulty, finish_game):
         super().__init__(window)
+        self.__on_finish = finish_game
         canvas = self.window.canva
         self.__paused=False
 
@@ -80,7 +81,6 @@ class GameFlow(GameState):
             reward = self.__enemies.update(delta_time, self.window.canva)
             self.__money += reward
             self.__base_health = max(0, self.__base_health - self.__enemies.base_damage)
-            self.__enemies.base_damage = 0
 
             # === Process tower actions
             self.__towers.update(self.__enemies.active_enemies, self.__collision)
@@ -89,6 +89,9 @@ class GameFlow(GameState):
             self.__display.money_display = self.__money
             self.__display.health_display = self.__base_health
             self.__display.wave_display = self.__enemies.display_wave
+
+            if self.game_over_check():
+                return
 
         # Keep checking while paused so the game can resume, and while playing
         # to process the next frame.
@@ -110,10 +113,7 @@ class GameFlow(GameState):
             self.__money = remaining_money
 
     def handle_key(self, event):
-        if event.keysym.lower() == "q":
-            # === Quit the game ===
-            self.window.running = False
-        elif event.keysym.lower() == "x":
+        if event.keysym.lower() == "x":
             # === Stop selecting the selected tower ===
             self.__towers.cancel_selection()
 
@@ -121,4 +121,13 @@ class GameFlow(GameState):
         tower_info = self.__towers.selected_tower_info
         self.__display.show_range(event.x, event.y, tower_info)
 
+    def game_over_check(self):
+        if self.__base_health <= 0:
+            self.__on_finish(State.LOST)
+            return True
 
+        if self.__enemies.is_complete:
+            self.__on_finish(State.VICTORY)
+            return True
+
+        return False

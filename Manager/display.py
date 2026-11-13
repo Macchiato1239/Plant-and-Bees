@@ -56,7 +56,7 @@ class Display:
             self.__canvas.itemconfigure(self.__space_taken_rect, state="hidden")
             return
 
-        reach = tower_info.act_range/2
+        reach = tower_info.act_range
         size = tower_info.size
 
         # === Change the circle's coordinate and size ===
