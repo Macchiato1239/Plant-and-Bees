@@ -1,18 +1,6 @@
-from Head.states import GameState
-class VictoryState(GameState):
+from States.gameover import GameOverState
+
+
+class VictoryState(GameOverState):
     def __init__(self, window):
-        super().__init__(window)
-        self.__canvas = self.window.canva
-        self.__text = self.__canvas.create_text(
-            400, 100,
-            text = "Victory !",
-            fill = "black",
-            font = ("Arial", 30),
-            state = "hidden"
-        )
-
-    def exit(self):
-        self.__canvas.itemconfig(self.__text, state = "hidden")
-
-    def enter(self):
-        self.__canvas.itemconfig(self.__text, state = "normal")
+        super().__init__(window, "Victory!")

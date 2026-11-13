@@ -16,7 +16,13 @@ class GameFlow(GameState):
         super().__init__(window)
         self.__on_finish = finish_game
         canvas = self.window.canva
+        self.__existing_canvas_items = set(canvas.find_all())
         self.__paused=False
+        self.__disposed = False
+        self.__after_id = None
+        self.__key_binding_id = None
+        self.__click_binding_id = None
+        self.__motion_binding_id = None
 
         self.__base_health = 100
         self.__starting_money = 750
@@ -45,8 +51,41 @@ class GameFlow(GameState):
 
     def exit(self):
         self.__paused = True
+        self.__towers.cancel_selection()
+
+    def cleanup(self):
+        """Stop this game flow and remove the canvas items it created."""
+        if self.__disposed:
+            return
+        self.exit()
+        self.__disposed = True
+
+        if self.__after_id is not None:
+            try:
+                self.window.window.after_cancel(self.__after_id)
+            except tk.TclError:
+                pass
+            self.__after_id = None
+
+        bindings = (
+            (self.window.window, "<KeyPress>", self.__key_binding_id),
+            (self.window.window, "<Button-1>", self.__click_binding_id),
+            (self.window.canva, "<Motion>", self.__motion_binding_id),
+        )
+        for widget, sequence, binding_id in bindings:
+            if binding_id is not None:
+                widget.unbind(sequence, binding_id)
+
+        for item_id in self.window.canva.find_all():
+            if item_id not in self.__existing_canvas_items:
+                self.window.canva.delete(item_id)
+
+        self.__collision.interactive.clear()
+        self.__collision.taken.clear()
 
     def create_game_loop(self):
+        if self.__disposed:
+            return
         # === Create slots ===
         self.__hotbar.create_slots()
         # === Equip towers ===
@@ -56,9 +95,15 @@ class GameFlow(GameState):
         self.__hotbar.update_colors()
 
         # === Bind input events to corressponding functions ===
-        self.window.window.bind("<KeyPress>", self.__mouse_handler.on_key_press, add="+")
-        self.window.window.bind("<Button-1>", self.__mouse_handler.interact_with_ui, add="+")
-        self.window.canva.bind("<Motion>", self.__mouse_handler.track_display_range)
+        self.__key_binding_id = self.window.window.bind(
+            "<KeyPress>", self.__mouse_handler.on_key_press, add="+"
+        )
+        self.__click_binding_id = self.window.window.bind(
+            "<Button-1>", self.__mouse_handler.interact_with_ui, add="+"
+        )
+        self.__motion_binding_id = self.window.canva.bind(
+            "<Motion>", self.__mouse_handler.track_display_range
+        )
 
         # === Render the base and spawn on top of everything ===
         self.window.canva.tag_raise(self.__buildings.spawn.rect.rect_id)
@@ -68,6 +113,9 @@ class GameFlow(GameState):
         self.game_loop()
 
     def game_loop(self):
+        self.__after_id = None
+        if self.__disposed:
+            return
         if not self.window.running:
             self.window.window.destroy()
             return
@@ -95,9 +143,11 @@ class GameFlow(GameState):
 
         # Keep checking while paused so the game can resume, and while playing
         # to process the next frame.
-        self.window.window.after(16, self.game_loop)
+        self.__after_id = self.window.window.after(16, self.game_loop)
 
     def handle_click(self, event):
+        if self.__disposed or self.__paused:
+            return
         x, y = event.x, event.y
         item = self.__collision.interactive_at(x, y)
         if item is not None:

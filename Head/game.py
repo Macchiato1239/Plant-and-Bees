@@ -12,10 +12,13 @@ class Game:
         # === Pass this to the other states ===
         self.__state=State.MENU
         self.__game=None #To be executed while state is playing
+        
         self.__pause=PausedState(self.__window_object) #To be executed while state is paused
         self.__menu=MenuState(self.__window_object)
+        self.__difficulty=self.__menu.difficulty
         self.__victory=VictoryState(self.__window_object)
         self.__lose=LostState(self.__window_object)
+
         self.__window.bind("<KeyPress>", self.toggle_pause, add="+")
         self.__window.bind("<KeyPress>", self.quit, add="+")
         self.__window.bind("<Button-1>", self.menu_handler, add="+")
@@ -23,21 +26,57 @@ class Game:
 
 
     def menu_handler(self, event):
-        action=self.__menu.handle_click(event)
-        if action == None:
+        if self.__state == State.MENU:
+            action = self.__menu.handle_click(event)
+            if action == "play":
+                self.__difficulty = self.__menu.difficulty
+                self.__menu.exit()
+                self.__start_game()
+            elif action == "difficulty":
+                self.__menu.cycle_difficulty()
+            elif action == "quit":
+                self.__window.destroy()
             return
-        if action == "play":
-            difficulty=self.__menu.difficulty
-            self.__state=State.PLAYING
-            self.__menu.exit()
-            self.__game=GameFlow(self.__window_object, difficulty, self.finish_game)
-            self.__game.create_game_loop()
 
-        elif action == "difficulty":
-            self.__menu.cycle_difficulty()
+        if self.__state == State.PAUSED:
+            action = self.__pause.handle_click(event)
+        elif self.__state == State.LOST:
+            action = self.__lose.handle_click(event)
+        elif self.__state == State.VICTORY:
+            action = self.__victory.handle_click(event)
+        else:
+            return
 
-        elif action == "quit":
-            self.__window.destroy()
+        if action == "resume":
+            self.__pause.exit()
+            self.__state = State.PLAYING
+            self.__game.enter()
+        elif action == "menu":
+            self.__return_to_menu()
+        elif action == "restart":
+            if self.__game is not None:
+                self.__game.cleanup()
+            self.__pause.exit()
+            self.__lose.exit()
+            self.__victory.exit()
+            self.__start_game()
+
+    def __start_game(self):
+        self.__state = State.PLAYING
+        self.__game = GameFlow(
+            self.__window_object, self.__difficulty, self.finish_game
+        )
+        self.__game.create_game_loop()
+
+    def __return_to_menu(self):
+        if self.__game is not None:
+            self.__game.cleanup()
+            self.__game = None
+        self.__lose.exit()
+        self.__victory.exit()
+        self.__pause.exit()
+        self.__state = State.MENU
+        self.__menu.enter()
 
     def process_state(self):
         if self.__state==State.MENU:
