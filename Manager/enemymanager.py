@@ -1,3 +1,5 @@
+import math
+
 from dictionary import Ebook
 from Base.enemy import Enemy
 from Manager.difficulty import diff
@@ -16,7 +18,9 @@ class EnemyManager:
         self.__game_progress = 0
         self.__base_damage = 0
         self.__completed_waves=0
-
+        self.__time_til_next_wave = 3.0
+        self.__time_since_last_wave = 0.0
+        self.__waiting_for_next_wave = False
         if difficulty_level==1:
             self.__game_info=diff.get("normal")
         elif difficulty_level==2:
@@ -54,12 +58,32 @@ class EnemyManager:
             return f"Wave {len(self.__game_info)}/{len(self.__game_info)}"
         return f"Wave {self.__game_progress + 1}/{len(self.__game_info)}"
 
+    @property
+    def next_wave_countdown(self):
+        if not self.__waiting_for_next_wave:
+            return ""
+        remaining = max(
+            0, self.__time_til_next_wave - self.__time_since_last_wave
+        )
+        return f"Next wave in: {math.ceil(remaining)}s"
+
     def update(self, delta_time, canvas):
-        # === Get delta time ===
-        self.__time_since_last_spawn += delta_time
+        if self.__waiting_for_next_wave:
+            self.__time_since_last_wave += delta_time
+            if self.__time_since_last_wave >= self.__time_til_next_wave:
+                self.__waiting_for_next_wave = False
+                self.__time_since_last_wave = 0.0
+                self.__game_progress += 1
+                self.__wave_progress = 0
+                self.__time_til_next_spawn = 0.0
+                self.__time_since_last_spawn = 0.0
+        else:
+            self.__time_since_last_spawn += delta_time
 
         # === Processing waves ===
-        if self.__game_progress != -1 and self.__wave_progress != -1:
+        if (not self.__waiting_for_next_wave
+                and self.__game_progress != -1
+                and self.__wave_progress != -1):
             # === If there are still waves and unsummoned enemies ===
             if self.__time_since_last_spawn >= self.__time_til_next_spawn:
                 # === Enough time has passed to spawn the next enemy ===
@@ -103,16 +127,17 @@ class EnemyManager:
                     # === Keep advancing if not ===
                     current_enemy.progress += 1
 
-        if (not self.__active_enemies and self.__game_progress != -1
-            and self.__wave_progress == -1):
-            # === Condition to move to next wave: 
-            # All enemies have been spawned and died
-            # The current wave is not the last ===
-            self.__completed_waves+=1
-            self.__wave_progress = 0
-            self.__game_progress += 1
-            if self.__game_progress >= len(self.__game_info):
+        if (not self.__active_enemies
+                and self.__game_progress != -1
+                and self.__wave_progress == -1
+                and not self.__waiting_for_next_wave):
+            # The wave is complete once all its enemies have been removed.
+            self.__completed_waves += 1
+            if self.__game_progress == len(self.__game_info) - 1:
                 self.__game_progress = -1
+            else:
+                self.__waiting_for_next_wave = True
+                self.__time_since_last_wave = 0.0
         return reward
 
     def spawn(self, enemy_info):

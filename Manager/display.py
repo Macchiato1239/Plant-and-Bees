@@ -9,6 +9,8 @@ class Display:
             500, 50, text = f"Health: {health}", font=("Arial", 24), fill="red")
         self.__wave_display = canvas.create_text(
             700, 50, text = f"Wave {wave}", font=("Arial", 20), fill="black")
+        self.__next_wave_display = canvas.create_text(
+            850, 50, text="", font=("Arial", 16), fill="black")
 
         # === Placement preview ===
         self.__range_circle = canvas.create_oval(
@@ -39,6 +41,14 @@ class Display:
     @wave_display.setter
     def wave_display(self, value):
         self.__canvas.itemconfig(self.__wave_display, text=str(value))
+
+    @property
+    def next_wave_display(self):
+        return self.__next_wave_display
+
+    @next_wave_display.setter
+    def next_wave_display(self, value):
+        self.__canvas.itemconfig(self.__next_wave_display, text=value)
 
     @property
     def range_circle(self):

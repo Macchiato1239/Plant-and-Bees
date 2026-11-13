@@ -146,6 +146,7 @@ class GameFlow(GameState):
             self.__display.money_display = self.__money
             self.__display.health_display = self.__base_health
             self.__display.wave_display = self.__enemies.display_wave
+            self.__display.next_wave_display = self.__enemies.next_wave_countdown
 
             if self.game_over_check():
                 return
