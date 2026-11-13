@@ -99,9 +99,6 @@ class GameFlow(GameState):
         self.__key_binding_id = self.window.window.bind(
             "<KeyPress>", self.__mouse_handler.on_key_press, add="+"
         )
-        self.__click_binding_id = self.window.window.bind(
-            "<Button-1>", self.__mouse_handler.interact_with_ui, add="+"
-        )
         self.__motion_binding_id = self.window.canva.bind(
             "<Motion>", self.__mouse_handler.track_display_range
         )
@@ -158,6 +155,7 @@ class GameFlow(GameState):
         self.__after_id = self.window.window.after(16, self.game_loop)
 
     def handle_click(self, event):
+        '''Handling click inputs'''
         if self.__disposed or self.__paused:
             return
         x, y = event.x, event.y
@@ -193,10 +191,14 @@ class GameFlow(GameState):
 
     def game_over_check(self):
         if self.__base_health <= 0:
+            # Clear placement mode before handing input over to the result
+            # overlay. This also resets the hotbar selection indicator.
+            self.__towers.cancel_selection()
             self.__on_finish(State.LOST)
             return True
 
         if self.__enemies.is_complete:
+            self.__towers.cancel_selection()
             self.__on_finish(State.VICTORY)
             return True
 

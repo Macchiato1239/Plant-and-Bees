@@ -57,7 +57,10 @@ class GameOverState(GameState):
         self.__collision.interactive = []
 
     def handle_click(self, event):
+        '''Check if user chose to resume, go to main menu or restart the game'''
         item = self.__collision.interactive_at(event.x, event.y)
+        if item is None:
+            return None
         if item is self.__resume_button:
             return "resume"
         if item is self.__menu_button:

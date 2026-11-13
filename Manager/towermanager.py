@@ -65,7 +65,7 @@ class TowerManager:
 
         tower_info = Tbook.get(self.__current_tower)
         if money < tower_info.cost:
-            self.__current_tower=None
+            self.cancel_selection()
             # === Check if there is sufficient fund ===
             return False, money
 

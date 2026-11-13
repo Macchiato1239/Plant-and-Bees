@@ -21,12 +21,15 @@ class Game:
 
         self.__window.bind("<KeyPress>", self.toggle_pause, add="+")
         self.__window.bind("<KeyPress>", self.quit, add="+")
-        self.__window.bind("<Button-1>", self.menu_handler, add="+")
+
+        # Canvas-local coordinates match the coordinates used by button hit tests.
+        self.__window_object.canva.bind("<Button-1>", self.menu_handler)
 
 
 
     def menu_handler(self, event):
         if self.__state == State.MENU:
+            # === If state is menu, check if any of the three buttons are clicked ===
             action = self.__menu.handle_click(event)
             if action == "play":
                 self.__difficulty = self.__menu.difficulty
@@ -36,7 +39,13 @@ class Game:
                 self.__menu.cycle_difficulty()
             elif action == "quit":
                 self.__window.destroy()
-            return
+            return "break"
+
+        # === If state is playing, the event is passed to game ===
+        if self.__state == State.PLAYING:
+            if self.__game is not None:
+                self.__game.handle_click(event)
+            return "break"
 
         if self.__state == State.PAUSED:
             action = self.__pause.handle_click(event)
@@ -60,6 +69,7 @@ class Game:
             self.__lose.exit()
             self.__victory.exit()
             self.__start_game()
+        return "break"
 
     def __start_game(self):
         self.__state = State.PLAYING
