@@ -1,8 +1,8 @@
 # Improvement
-3. Make farm
-4. Render projectile
-4. Implement deleting towers
-4. Render projectile
-7. Implement equipping towers
-8. Add testing
+1. Projectile
+2. Display stat
+3. Make more towers and enemies, make 3 modes
+4. Implement equipping towers
+5. Add testing, type hinting
+6. uml diagram
 # Clean up

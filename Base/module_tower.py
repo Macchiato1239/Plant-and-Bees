@@ -164,54 +164,6 @@ class DebuffTower(DpsTower):
         return damage
 
 
-
-class SupportTower(Tower):
-    def __init__(self, TowerInfo, rect):
-        super().__init__(TowerInfo, rect)
-        self.__fire_rate_boost=TowerInfo.support.fire_rate
-        self.__act_range_boost=TowerInfo.support.act_range
-        self.__damage_boost=TowerInfo.support.damage
-        self.__cost_boost=TowerInfo.support.cost
-
-    @property
-    def fire_rate_boost(self):
-        return self.__fire_rate_boost
-
-    @fire_rate_boost.setter
-    def fire_rate_boost(self, value):
-        if isinstance(value, (float, int)):
-            self.__fire_rate_boost=value
-    
-    @property
-    def act_range_boost(self):
-        return self.__act_range_boost
-
-    @act_range_boost.setter
-    def act_range_boost(self, value):
-        if isinstance(value, (float, int)):
-            self.__act_range_boost=value
-
-    @property
-    def damage_boost(self):
-        return self.__damage_boost
-
-    @damage_boost.setter
-    def damage_boost(self, value):
-        if isinstance(value, (float, int)):
-            self.__damage_boost=value
-
-    @property
-    def cost_boost(self):
-        return self.__cost_boost
-
-    @cost_boost.setter
-    def cost_boost(self, value):
-        if isinstance(value, (float, int)):
-            self.__cost_boost=value
-
-    def act(self):
-        return None
-
 class Farm(Tower):
     def __init__(self, TowerInfo, rect):
         super().__init__(TowerInfo, rect)

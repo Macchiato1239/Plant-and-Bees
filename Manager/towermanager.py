@@ -1,5 +1,5 @@
 from dictionary import Tbook
-from Base.module_tower import DebuffTower, DpsTower, EffectType, Farm, SupportTower
+from Base.module_tower import DebuffTower, DpsTower, EffectType, Farm
 from Base.rect import Rect
 
 
