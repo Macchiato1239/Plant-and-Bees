@@ -62,6 +62,6 @@ class MenuState(GameState):
         return self.__difficulty
 
     def cycle_difficulty(self):
-        self.__difficulty = 1 if self.__difficulty == 2 else 2
-        label = "Normal" if self.__difficulty == 1 else "Hard"
+        self.__difficulty = self.__difficulty % 3 + 1
+        label = {1: "Normal", 2: "Hard", 3: "Insane"}[self.__difficulty]
         self.__difficulty_button.text = f"Difficulty: {label}"

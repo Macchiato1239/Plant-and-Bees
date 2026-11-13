@@ -57,14 +57,18 @@ class Tower_Dictionary(Dictionary):
         
 Ebook=Enemy_Dictionary()
 
-Ebook.add("normal", 1, 10, 0.5, "green", 30, 30)
-Ebook.add("swift", 2, 12, 1, "lime", 26, 26)
-Ebook.add("heavy", 3, 60, 0.25, "black", 32, 32)
-Ebook.add("Normal Boss", 4, 200, 0.5, "red", 35,35)
+Ebook.add("Normal", 1, 6, 0.5, "#baff7d", 20, 20)
+Ebook.add("Quick", 2, 8, 1, "#43adc4", 20, 20)
+Ebook.add("Heavy", 3, 30, 0.4, "#63838a", 25, 25)
+Ebook.add("Abnormal", 4, 12, 0.5, "#7cb24d", 22,22)
+Ebook.add("Swift", 5, 20, 1.2, "#145463", 22, 22)
+Ebook.add("Elite abnormal", 6, 150, 0.5, "#076f00", 27, 27)
+Ebook.add("Speedy Boss", 7, 500, 0.8, "#005e94", 30, 30)
+Ebook.add("Giant Boss", 8, 2000, 0.2, "black", 35, 35)
 
-Tbook=Tower_Dictionary()
+Tbook=Tower_Dictionary() 
 
-Tbook.add(type="dps", key=1, name="soldier", cost=200, color="red", act_range=200, size=20, dps=DpsStats(100, 0.5))
-Tbook.add(type="debuff", key=2, name="freezer", cost=200, color="blue", act_range=200, size=20, dps=DpsStats(5, 0.8), debuff=DebuffStats(EffectType.FROZEN,1,0.2))
-Tbook.add(type="dps", key=3, name="minigunner", cost=400, color="pink", act_range=300, size=25, dps=DpsStats(5,0.1))
-Tbook.add(type="income", key=4, name="farm", cost=200, color="yellow", act_range=10, size=20, income=IncomeStats(100))
+Tbook.add(type="dps", key=1, name="soldier", cost=200, color="red", act_range=200, size=20, dps=DpsStats(10, 0.5))
+Tbook.add(type="debuff", key=2, name="freezer", cost=400, color="blue", act_range=200, size=20, dps=DpsStats(5, 0.8), debuff=DebuffStats(EffectType.FROZEN,1,0.4))
+Tbook.add(type="dps", key=3, name="minigunner", cost=2000, color="pink", act_range=300, size=25, dps=DpsStats(15,0.2))
+Tbook.add(type="income", key=4, name="farm", cost=250, color="yellow", act_range=10, size=20, income=IncomeStats(100))

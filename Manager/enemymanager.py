@@ -25,6 +25,8 @@ class EnemyManager:
             self.__game_info=diff.get("normal")
         elif difficulty_level==2:
             self.__game_info=diff.get("hard")
+        elif difficulty_level==3:
+            self.__game_info=diff.get("insane")
 
         # ===A map containing enemy id, time before spawning the next enemy===
 
