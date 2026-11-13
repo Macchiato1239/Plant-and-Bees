@@ -15,7 +15,15 @@ class TowerManager:
         self.__current_tower = None
         self.__current_tower_signal = Rect(canvas, 0, 0, 30, 30, "red")
 
-    
+    @property
+    def farm_income_per_wave(self):
+        '''Total amount of money gained from the tower farm'''
+        return sum(
+            tower.income
+            for tower in self.__active_towers
+            if isinstance(tower, Farm)
+        )
+        
     @property
     def active_towers(self):
         return self.__active_towers
@@ -80,7 +88,7 @@ class TowerManager:
         ''''''
         for tower in self.__active_towers:
             if not isinstance(tower, DpsTower):
-                if isinstance(tower, (SupportTower, Farm)):
+                if isinstance(tower, Farm):
                     continue
                 continue
 

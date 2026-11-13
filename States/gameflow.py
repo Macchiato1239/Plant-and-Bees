@@ -27,6 +27,7 @@ class GameFlow(GameState):
         self.__base_health = 100
         self.__starting_money = 750
         self.__money = self.__starting_money
+        self.__paid_wave_count=0
 
         self.__last_time = time.time()
         self.__current_time = self.__last_time
@@ -54,7 +55,7 @@ class GameFlow(GameState):
         self.__towers.cancel_selection()
 
     def cleanup(self):
-        """Stop this game flow and remove the canvas items it created."""
+        '''Stop this game flow and remove the canvas items it created.'''
         if self.__disposed:
             return
         self.exit()
@@ -130,8 +131,16 @@ class GameFlow(GameState):
             self.__money += reward
             self.__base_health = max(0, self.__base_health - self.__enemies.base_damage)
 
-            # === Process tower actions
+            # === Process tower actions ===
             self.__towers.update(self.__enemies.active_enemies, self.__collision)
+            
+            # === Amount of money gained from farms per wave ===
+            completed = self.__enemies.completed_waves
+            newly_completed = completed - self.__paid_wave_count
+
+            if newly_completed > 0:
+                self.__money += self.__towers.farm_income_per_wave * newly_completed
+                self.__paid_wave_count = completed
 
             # === Update money, base health and wave number
             self.__display.money_display = self.__money

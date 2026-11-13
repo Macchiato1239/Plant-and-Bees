@@ -15,6 +15,7 @@ class EnemyManager:
         self.__wave_progress = 0
         self.__game_progress = 0
         self.__base_damage = 0
+        self.__completed_waves=0
 
         if difficulty_level==1:
             self.__game_info=diff.get("normal")
@@ -23,7 +24,9 @@ class EnemyManager:
 
         # ===A map containing enemy id, time before spawning the next enemy===
 
-
+    @property
+    def completed_waves(self):
+        return self.__completed_waves
     @property 
     def is_complete(self):
         return self.__game_progress == -1 and not self.__active_enemies
@@ -105,7 +108,7 @@ class EnemyManager:
             # === Condition to move to next wave: 
             # All enemies have been spawned and died
             # The current wave is not the last ===
-
+            self.__completed_waves+=1
             self.__wave_progress = 0
             self.__game_progress += 1
             if self.__game_progress >= len(self.__game_info):
