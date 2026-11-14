@@ -2,6 +2,11 @@ import math
 
 from dictionary import Ebook
 from Base.enemy import Enemy
+from Base.exceptions import (
+    InvalidDifficultyError,
+    InvalidWaveDataError,
+    UnknownDefinitionError,
+)
 from difficulty import diff
 
 class EnemyManager:
@@ -9,7 +14,7 @@ class EnemyManager:
 
     def __init__(self, canvas, difficulty_level, spawn, path_points):
         if not isinstance(difficulty_level, int):
-            raise TypeError("difficulty_level must be an integer from 1 to 3")
+            raise TypeError("difficulty_level must be an integer")
         self.__canvas = canvas
         self.__spawn = spawn
         self.__path_points = path_points
@@ -27,7 +32,7 @@ class EnemyManager:
         try:
             mode = modes[difficulty_level]
         except KeyError as error:
-            raise ValueError(
+            raise InvalidDifficultyError(
                 "difficulty_level must be 1 (normal), 2 (hard), or 3 (insane)"
             ) from error
         self.__game_info = diff.get(mode)
@@ -105,11 +110,15 @@ class EnemyManager:
                         f"spawn {self.__wave_progress + 1}"
                     ) from error
                 except (TypeError, ValueError) as error:
-                    raise ValueError(
+                    raise InvalidWaveDataError(
                         "Each wave entry must contain an enemy ID and spawn delay"
                     ) from error
                 try:
                     enemy_info = Ebook.get(enemy_id)
+                except KeyError as error:
+                    raise UnknownDefinitionError(
+                        f"Enemy_Dictionary has no entry for key {enemy_id!r}"
+                    ) from error
                 except TypeError as error:
                     raise TypeError("Wave enemy IDs must be hashable dictionary keys") from error
                 self.spawn(enemy_info)
@@ -130,10 +139,12 @@ class EnemyManager:
                 destination_x, destination_y = destination
             except IndexError as error:
                 raise IndexError(
-                    f"Enemy path progress {current_enemy.progress} is outside the path"
+                    f"Enemy path progress {current_enemy.progress} is not in the path list"
                 ) from error
             except (TypeError, ValueError) as error:
-                raise ValueError("Each path point must contain an x and y coordinate") from error
+                raise InvalidWaveDataError(
+                    "Each path point must contain an x and y coordinate"
+                ) from error
 
             reached = current_enemy.update(
                 delta_time, canvas, (destination_x, destination_y)

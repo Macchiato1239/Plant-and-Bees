@@ -23,6 +23,7 @@ https://github.com/Macchiato1239/Plant-and-Bees
 2. Freezer has a dps of 6.25 but it applies freeze debuff on enemy, which is pretty good, the price is 400
 3. Minigunner has a dps of 75 so the price is 2000, idk if i should change the cost in the future
 4. Farm is a bit tricky but VERY CRUCIAL if you have never played tds or btd, if you have killed every enemy in a wave, the game will reward you the farm's income * the amount of farm you have. Farm's income is currently 100/wave
+5. Pyro burning debuff is quite good since the burn lasts for 20 seconds, but if there are too many fast enemies, they can still not get burnt and run out of pyro range before he cools down, the price is 500
 ## 3.2. Enemy
 1. Enemy is simpler than how i intended to implement, but due to time constraint, i decided to not implement enemy buff
 2. Enemy two main points are health and speed, some have health but low speed and vice versa. Some can have both.

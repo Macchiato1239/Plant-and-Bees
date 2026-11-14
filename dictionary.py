@@ -1,4 +1,5 @@
 from Base.enemy import Enemy, Enemy_Info
+from Base.exceptions import InvalidTowerConfigurationError, UnknownDefinitionError
 from Base.module_tower import TowerInfo, Tower, EffectType, DpsStats, DebuffStats, IncomeStats
 from Base.module_tower import DpsTower, DebuffTower, Farm
 from abc import ABC, abstractmethod
@@ -21,10 +22,8 @@ class Dictionary(ABC):
             return self.__dictionary[key]
         except KeyError as error:
             raise KeyError(
-                f"{type(self).__name__} has no entry for key {key!r}"
+                f"{type(self).__name__} has no key {key!r}"
             ) from error
-        except TypeError as error:
-            raise TypeError("Dictionary keys must be hashable") from error
     
 class Enemy_Dictionary(Dictionary):
     '''Contains all enemy information'''
@@ -50,12 +49,17 @@ class Tower_Dictionary(Dictionary):
         elif type =="income":
             item=TowerInfo(name, cost, color, act_range, size, income=income)
         else:
-            raise ValueError(f"Unsupported tower type: {type!r}")
+            raise InvalidTowerConfigurationError(
+                f"Unsupported tower type: {type!r}"
+            )
         self.dictionary[key]=[type,item]
 
     def get(self,key):
         ''' Retrieve the request tower'''
-        packet=super().get(key)
+        try:
+            packet=super().get(key)
+        except KeyError as error:
+            raise UnknownDefinitionError(f"Unknown tower ID: {key!r}") from error
         return packet[1]
 
 
@@ -64,7 +68,7 @@ class Tower_Dictionary(Dictionary):
         try:
             tower_type, tower_info = self.dictionary[key]
         except KeyError as error:
-            raise KeyError(f"Unknown tower ID: {key!r}") from error
+            raise UnknownDefinitionError(f"Unknown tower ID: {key!r}") from error
 
         try:
             if tower_type == "dps":
@@ -77,7 +81,9 @@ class Tower_Dictionary(Dictionary):
             raise AttributeError(
                 f"Tower {key!r} is missing stats required for type {tower_type!r}"
             ) from error
-        raise ValueError(f"Tower {key!r} has unsupported type {tower_type!r}")
+        raise InvalidTowerConfigurationError(
+            f"Tower {key!r} has unsupported type {tower_type!r}"
+        )
         
 Ebook=Enemy_Dictionary()
 
