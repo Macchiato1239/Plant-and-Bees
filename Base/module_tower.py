@@ -24,6 +24,15 @@ class DebuffStats:
     duration: float | int
     # === How long the debuff is applied ===
 
+    def apply_to(self, enemy) -> None:
+        '''Apply this debuff to an enemy that supports its effect.'''
+        if self.type == EffectType.FROZEN:
+            enemy.freeze = self.duration
+            enemy.freeze_level += self.magnitude
+        elif self.type == EffectType.BURN:
+            enemy.burn = self.duration
+            enemy.burn_damage = self.magnitude
+
 @dataclass(frozen=True)
 class IncomeStats:
     '''Stats for towers that can bring income'''
@@ -60,6 +69,16 @@ class Tower(Entity, ABC):
     @property
     def size(self) -> int | float:
         return self.__size
+
+    @property
+    def wave_income(self) -> int:
+        '''Income granted when a wave completes; only towers made by farm class can do it'''
+        return 0
+
+    @property
+    def debuff(self) -> DebuffStats | None:
+        '''Debuff applied by this tower, if it has one.'''
+        return None
 
     # =====
     @property
@@ -143,30 +162,36 @@ class DebuffTower(DpsTower):
     '''Tower that can shoot and apply debuff with it'''
     def __init__(self, TowerInfo: TowerInfo, rect: Rect) -> None:
         super().__init__(TowerInfo, rect)
-        self.__type=TowerInfo.debuff.type
-        self.__magnitude=TowerInfo.debuff.magnitude
-        self.__duration=TowerInfo.debuff.duration
+        self.__debuff=TowerInfo.debuff
+
+    @property
+    def debuff(self) -> DebuffStats:
+        return self.__debuff
 
     @property
     def type(self) -> EffectType:
-        return self.__type
+        return self.__debuff.type
 
     # =====
     @property
     def magnitude(self) -> int | float:
-        return self.__magnitude
+        return self.__debuff.magnitude
     @magnitude.setter
     def magnitude(self, value: int | float) -> None:
         if isinstance(value, (float, int)):
-            self.__magnitude=value
+            self.__debuff = DebuffStats(
+                self.__debuff.type, value, self.__debuff.duration
+            )
     # =====
     @property
     def duration(self) -> int | float:
-        return self.__duration
+        return self.__debuff.duration
     @duration.setter
     def duration(self, value: int | float) -> None:
         if isinstance(value, (float, int)):
-            self.__duration=value
+            self.__debuff = DebuffStats(
+                self.__debuff.type, self.__debuff.magnitude, value
+            )
     # =====
 
     def act(self) -> None | int | float:
@@ -187,6 +212,10 @@ class Farm(Tower):
     def income(self, value: int | float) -> None:
         if isinstance(value, int):
             self.__income=value
+
+    @property
+    def wave_income(self) -> int:
+        return self.__income
     # =====
     def act(self) -> None:
         '''The tower only action is existing, its number in the game will count towards how much money is gained per wave'''

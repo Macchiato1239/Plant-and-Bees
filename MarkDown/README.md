@@ -50,3 +50,8 @@ python3 -m pip install --break-system-packages pytest pytest-cov
 - If you looked into the previous commits, the initial name of the project is plant-and-bees, this is inspired by my friend who is also doing an oop project that has actual characters and world building in them.
 - But i changed the project to simply tower defense, which is rather basic, this is mainly because i faced many difficulties while trying to implement the game core functions and had to keep modifying its structures. 
 - Due to the difficulties of the project that i put myself on, i decided to strip the project of its world building so that i can focus on the technical side of it. If i had more time, i would have gotten into world building and make the towers and enemies more balanced, interesting. Initially i also made more than 3 tower types and intended to implement buff for enemies, but i supposed that would be scope creep for what the purpose of this project.
+
+===
+Previously, i designed the towers in a way that every behavior is handled inside tower manager. This makes future update and modification much harder, for example: add a new tower type would require modifying codes in dictionary, module_tower and tower manager (too much and a bad design i would say). Apparently, this does not also follow the second priciple of SOLID
+
+Even though i have thought of this before, a better design should be make tower properties the same among ALL tower types, and make only tower of the right type the right to use them. This means adding tower type requires less modification in tower manager, tower and dictionary

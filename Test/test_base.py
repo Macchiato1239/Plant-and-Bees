@@ -193,6 +193,7 @@ def test_projectile_zero_distance(canvas):
 def test_tower_models_and_dictionary_summoning(canvas, monkeypatch):
     info = TowerInfo("test", 10, "red", 50, 5, DpsStats(4, 1))
     tower = DpsTower(info, Rect(canvas, 0, 0, 10, 10))
+    assert tower.wave_income == 0
     assert (tower.name, tower.size, tower.cost, tower.color, tower.act_range) == (
         "test", 5, 10, "red", 50
     )
@@ -231,15 +232,24 @@ def test_tower_models_and_dictionary_summoning(canvas, monkeypatch):
     debuff.magnitude = "invalid"
     debuff.duration = None
     assert debuff.magnitude == 2.5 and debuff.duration == 3
+    assert debuff.debuff.magnitude == 2.5 and debuff.debuff.duration == 3
     debuff.fire_rate = 1
     debuff.last_act = 2
     assert debuff.act() is None
+    frozen_enemy = SimpleNamespace(freeze=0, freeze_level=0)
+    debuff.debuff.apply_to(frozen_enemy)
+    assert frozen_enemy.freeze == 3 and frozen_enemy.freeze_level == 2.5
+
+    burn_effect = DebuffStats(EffectType.BURN, 4, 2)
+    burned_enemy = SimpleNamespace(burn=0, burn_damage=0)
+    burn_effect.apply_to(burned_enemy)
+    assert burned_enemy.burn == 2 and burned_enemy.burn_damage == 4
 
     farm_info = TowerInfo("farm", 8, "yellow", 0, 5, income=IncomeStats(100))
     farm = Farm(farm_info, Rect(canvas, 0, 0, 10, 10))
     farm.income = 125
     farm.income = 2.5
-    assert farm.income == 125 and farm.act() is None
+    assert farm.income == 125 and farm.wave_income == 125 and farm.act() is None
     from Base.module_tower import Tower
     assert Tower.act(tower) is None
     assert Tbook.summon_tower(1, Rect(canvas, 0, 0, 10, 10)).name == "soldier"

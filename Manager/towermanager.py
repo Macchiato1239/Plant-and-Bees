@@ -1,5 +1,4 @@
 from dictionary import Tbook
-from Base.module_tower import DebuffTower, DpsTower, EffectType, Farm
 from Base.projectile import Projectile
 from Base.rect import Rect
 
@@ -20,12 +19,8 @@ class TowerManager:
 
     @property
     def farm_income_per_wave(self):
-        '''Total amount of money gained from the tower farm'''
-        return sum(
-            tower.income
-            for tower in self.__active_towers
-            if isinstance(tower, Farm)
-        )
+        '''Total income granted by all towers when a wave completes.'''
+        return sum(tower.wave_income for tower in self.__active_towers)
         
     @property
     def active_towers(self):
@@ -129,11 +124,6 @@ class TowerManager:
                 self.__projectiles.remove(projectile)
 
         for tower in self.__active_towers:
-            if not isinstance(tower, DpsTower):
-                if isinstance(tower, Farm):
-                    continue
-                continue
-
             damage = tower.act()
             if not damage:
                 continue
@@ -152,11 +142,8 @@ class TowerManager:
                 Projectile(self.__canvas, start, destination)
             )
             target.health -= damage
-            if isinstance(tower, DebuffTower):
-                if tower.type == EffectType.FROZEN:
-                    # === Apply freeze debuff ===
-                    target.freeze = tower.duration
-                    target.freeze_level += tower.magnitude
+            if tower.debuff is not None:
+                tower.debuff.apply_to(target)
 
     @staticmethod
     def __enemy_sorter(enemies):
