@@ -10,7 +10,7 @@ import Head.game as game_module
 import Head.module_window as window_module
 from Head.game import Game
 from Head.module_window import Window
-from Head.states import GameState, State
+from States.states import GameState, State
 from Manager.collision import CollisionManager
 from States.gameflow import GameFlow
 from States.gameover import GameOverState

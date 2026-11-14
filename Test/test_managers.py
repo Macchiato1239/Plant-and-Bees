@@ -6,7 +6,7 @@ from Base.build import Spawn
 from Base.enemy import Enemy
 from Base.rect import Rect
 from Manager.collision import CollisionManager
-from Manager.difficulty import Difficulty, diff, make_wave
+from difficulty import Difficulty, diff, make_wave
 from Manager.display import Display
 from Manager.enemymanager import EnemyManager
 from Manager.hotbarmanager import HotBarManager

@@ -7,7 +7,7 @@ from Base.button import Button
 from Base.debuff import EffectType
 from Base.enemy import Enemy, Enemy_Info
 from Base.hotbar import Slot
-from Base.Entity import Entity
+from Base.entity import Entity
 from Base.module_tower import (
     DebuffStats,
     DebuffTower,
