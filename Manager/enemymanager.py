@@ -125,17 +125,6 @@ class EnemyManager:
         reward = 0
         self.__base_damage=0
         for current_enemy in self.__active_enemies[:]:
-            current_enemy.process_debuff(delta_time)
-            # === Enemy process debuff ===
-
-            if current_enemy in self.__active_enemies and current_enemy.health <= 0:
-                # === Process enemies' death and add it to the reward ===
-                reward += current_enemy.reward
-                self.__active_enemies.remove(current_enemy)
-                current_enemy.delete()
-                continue
-            
-
             try:
                 destination = self.__path_points[current_enemy.progress]
                 destination_x, destination_y = destination
@@ -145,9 +134,18 @@ class EnemyManager:
                 ) from error
             except (TypeError, ValueError) as error:
                 raise ValueError("Each path point must contain an x and y coordinate") from error
-            reached = current_enemy.move(
-                canvas, destination_x, destination_y, delta_time * 100
+
+            reached = current_enemy.update(
+                delta_time, canvas, (destination_x, destination_y)
             )
+
+            if current_enemy in self.__active_enemies and current_enemy.health <= 0:
+                # === Process enemies' death and add it to the reward ===
+                reward += current_enemy.reward
+                self.__active_enemies.remove(current_enemy)
+                current_enemy.delete()
+                continue
+
 
             # === Check if enemy reached a coordinate in the paths (corner or base) ===
             if reached:

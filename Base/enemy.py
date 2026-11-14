@@ -1,5 +1,6 @@
 from Base.rect import Rect
 from Base.entity import Entity
+from Base.debuff import BurnEffect, FreezeEffect, StatusEffect
 
 class Enemy(Entity): 
     def __init__(self, canva, name: str, x1: int, y1: int, width: int, height: int, health: int, speed: int, color:str) -> None: 
@@ -17,14 +18,13 @@ class Enemy(Entity):
         self.__distance_covered=0
         # === how far enemies have travelled ===
 
-        # === Debuff ===
-        self.__freeze=0 #Freeze duration
-        self.__freeze_level=0 # How much enemy is slowed down
-        
-        self.__burn=0 # Burn duration
-        self.__burn_damage=0 # How is much damage burn effect apply per tick
-
-        self.__stun=0 # Stun duration
+        self.__effects: list[StatusEffect] = []
+        # Compatibility values used by the existing freeze/burn properties.
+        self.__freeze=0
+        self.__freeze_level=0
+        self.__burn=0
+        self.__burn_damage=0
+        self.__stun=0
 
     @property
     def initial_health(self) -> int:
@@ -159,36 +159,63 @@ class Enemy(Entity):
         # === If both are true, enemy has reach it's destination ===
         return x_reach and y_reach
 
+    def apply_effect(self, effect: StatusEffect) -> None:
+        '''Attach an effect object; new enemy effects are added without changing the manager.'''
+        if not isinstance(effect, StatusEffect):
+            raise TypeError("effect must be a StatusEffect")
+        for active_effect in self.__effects:
+            if active_effect.refresh_from(effect):
+                return
+        self.__effects.append(effect)
+
+    def update(self, delta_time: int | float, canvas, destination) -> bool:
+        '''Update effects and movement; return whether the destination was reached.'''
+        self.__update_effects(delta_time)
+        if self.__health <= 0 or self.__speed <= 0:
+            return False
+        x, y = destination
+        return self.move(canvas, x, y, delta_time * 100)
+
+    def __update_effects(self, delta_time: int | float) -> None:
+        self.__effects = [effect for effect in self.__effects
+                          if not effect.update(self, delta_time)]
+        self.__freeze = max((effect.remaining for effect in self.__effects
+                             if isinstance(effect, FreezeEffect) and effect.level < 4), default=0)
+        self.__freeze_level = min(4, sum(effect.level for effect in self.__effects
+                                          if isinstance(effect, FreezeEffect) and effect.level < 4))
+        self.__burn = max((effect.remaining for effect in self.__effects
+                           if isinstance(effect, BurnEffect)), default=0)
+        self.__burn_damage = sum(effect.damage for effect in self.__effects
+                                 if isinstance(effect, BurnEffect))
+        self.__stun = max((effect.stun_remaining for effect in self.__effects
+                           if isinstance(effect, FreezeEffect) and effect.level >= 4), default=0)
+        multiplier = 1.0
+        stunned = False
+        for effect in self.__effects:
+            multiplier *= effect.speed_multiplier
+            stunned = stunned or effect.is_stunning
+        self.__speed = 0 if stunned else self.__initial_speed * multiplier
+
     def process_debuff(self, delta_time: int | float) -> None:
-        # === Apply debuff's effect onto enemy's stats ===
-        if self.__burn!=0:
-            # === Tick damage ===
-            self.__health-=self.__burn_damage
-            self.__burn=max(0, self.__burn-delta_time)
+        '''Process the debuff that enemy may have'''
+        # === Apply freeze to self ===
+        if self.__freeze > 0 and not any(isinstance(effect, FreezeEffect) for effect in self.__effects):
+            self.apply_effect(FreezeEffect(self.__freeze, self.__freeze_level))
+        # === Apply burn to self ===
+        if self.__burn > 0 and not any(isinstance(effect, BurnEffect) for effect in self.__effects):
+            self.apply_effect(BurnEffect(self.__burn, self.__burn_damage))
+        self.__update_effects(delta_time)
 
-        if self.__freeze!=0:
-            # === Slow and stun ===
-            if self.__freeze_level in [1,2,3]:
-                self.__speed-=(self.__speed*20*self.__freeze_level)/100
-                self.__freeze=max(0, self.__freeze-delta_time)
-            if self.__freeze_level == 4:
-                self.__stun=0.6
-                self.__freeze_level=0
-                self.__freeze=0
+    def add_freeze(self, duration: int | float, level: int | float) -> None:
+        self.apply_effect(FreezeEffect(duration, level))
 
-        if self.__stun!=0:
-            # === Stop enemy movement ===
-            self.__speed=0
-            self.__stun=max(0, self.__stun-delta_time)
-
-        if self.__stun==0 and self.__freeze==0:
-            # === Enemy recovery and stats recover to default ===
-            self.__speed=self.__initial_speed
+    def add_burn(self, duration: int | float, damage: int | float) -> None:
+        self.apply_effect(BurnEffect(duration, damage))
         
 
 class Enemy_Info:
     '''Information cards for enemy, Enemy Manager class uses Enemy_Info to create Enemy '''
-    def __init__(self, name: str, health: int, speed: int, color:str, width: int, height: ibt) -> None:
+    def __init__(self, name: str, health: int, speed: int, color:str, width: int, height: int) -> None:
         self.__name=name
         self.__health=health
         self.__speed=speed

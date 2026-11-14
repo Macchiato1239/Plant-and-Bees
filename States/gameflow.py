@@ -106,7 +106,7 @@ class GameFlow(GameState):
         # === Create slots ===
         self.__hotbar.create_slots()
         # === Equip towers ===
-        for tower_id in (1, 2, 3, 4):
+        for tower_id in (1, 2, 3, 4, 5):
             self.__hotbar.equip_tower(tower_id)
         # === Signal which slot is empty ===
         self.__hotbar.update_colors()

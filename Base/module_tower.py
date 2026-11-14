@@ -2,7 +2,7 @@ from Base.entity import Entity
 import time
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
-from Base.debuff import EffectType
+from Base.debuff import BurnEffect, EffectType, FreezeEffect
 from Base.rect import Rect
 
 @dataclass(frozen=True)
@@ -23,15 +23,21 @@ class DebuffStats:
     # === How strong the debuff is ===
     duration: float | int
     # === How long the debuff is applied ===
+    tick: float | int = 1
+    # === Seconds between damage ticks; used by burn effects ===
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.tick, (int, float)):
+            raise TypeError("tick must be numeric")
+        if self.tick <= 0:
+            raise ValueError("tick must be greater than zero")
 
     def apply_to(self, enemy) -> None:
-        '''Apply this debuff to an enemy that supports its effect.'''
+        '''Create and attach an effect object to the target enemy.'''
         if self.type == EffectType.FROZEN:
-            enemy.freeze = self.duration
-            enemy.freeze_level += self.magnitude
+            enemy.apply_effect(FreezeEffect(self.duration, self.magnitude))
         elif self.type == EffectType.BURN:
-            enemy.burn = self.duration
-            enemy.burn_damage = self.magnitude
+            enemy.apply_effect(BurnEffect(self.duration, self.magnitude, self.tick))
 
 @dataclass(frozen=True)
 class IncomeStats:
@@ -180,7 +186,8 @@ class DebuffTower(DpsTower):
     def magnitude(self, value: int | float) -> None:
         if isinstance(value, (float, int)):
             self.__debuff = DebuffStats(
-                self.__debuff.type, value, self.__debuff.duration
+                self.__debuff.type, value, self.__debuff.duration,
+                self.__debuff.tick
             )
     # =====
     @property
@@ -190,9 +197,22 @@ class DebuffTower(DpsTower):
     def duration(self, value: int | float) -> None:
         if isinstance(value, (float, int)):
             self.__debuff = DebuffStats(
-                self.__debuff.type, self.__debuff.magnitude, value
+                self.__debuff.type, self.__debuff.magnitude, value,
+                self.__debuff.tick
             )
     # =====
+
+    @property
+    def tick(self) -> int | float:
+        return self.__debuff.tick
+
+    @tick.setter
+    def tick(self, value: int | float) -> None:
+        if isinstance(value, (int, float)) and value > 0:
+            self.__debuff = DebuffStats(
+                self.__debuff.type, self.__debuff.magnitude,
+                self.__debuff.duration, value
+            )
 
     def act(self) -> None | int | float:
         return super().act()

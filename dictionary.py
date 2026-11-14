@@ -92,7 +92,8 @@ Ebook.add("Giant Boss", 8, 2000, 0.2, "black", 35, 35)
 
 Tbook=Tower_Dictionary() 
 
-Tbook.add(type="dps", key=1, name="soldier", cost=250, color="red", act_range=200, size=20, dps=DpsStats(10, 0.5))
-Tbook.add(type="debuff", key=2, name="freezer", cost=400, color="blue", act_range=200, size=20, dps=DpsStats(5, 0.8), debuff=DebuffStats(EffectType.FROZEN,1,0.4))
-Tbook.add(type="dps", key=3, name="minigunner", cost=2000, color="pink", act_range=300, size=25, dps=DpsStats(15,0.2))
+Tbook.add(type="dps", key=1, name="soldier", cost=250, color="red", act_range=150, size=20, dps=DpsStats(10, 0.5))
+Tbook.add(type="debuff", key=2, name="freezer", cost=400, color="blue", act_range=150, size=20, dps=DpsStats(5, 0.8), debuff=DebuffStats(EffectType.FROZEN,1,0.4))
+Tbook.add(type="dps", key=3, name="minigunner", cost=2000, color="pink", act_range=250, size=25, dps=DpsStats(15,0.2))
 Tbook.add(type="income", key=4, name="farm", cost=200, color="yellow", act_range=10, size=20, income=IncomeStats(100))
+Tbook.add(type="debuff", key=5, name="Pyro", cost=500, color="orange", act_range=80, size=20, dps=DpsStats(2, 0.6), debuff=DebuffStats(EffectType.BURN, 3, 20, tick=0.5))
