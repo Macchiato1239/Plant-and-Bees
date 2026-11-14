@@ -1,7 +1,8 @@
 import math
 
 class Projectile:
-    def __init__(self, canvas, start, target, speed=1000):
+    '''Visual Projectile when a shooter tower attack, simply visual, no collision or anything else included'''
+    def __init__(self, canvas, start: int, target: int, speed=1500) -> None:
         self.__canvas = canvas
 
         self.__x, self.__y = start
@@ -30,7 +31,7 @@ class Projectile:
             outline=""
         )
 
-    def update(self, dt):
+    def update(self, dt: int | float) -> bool:
         dx = self.__target_x - self.__x
         dy = self.__target_y - self.__y
         remaining_distance = math.hypot(dx, dy)
@@ -53,5 +54,5 @@ class Projectile:
 
         return self.__x == self.__target_x and self.__y == self.__target_y
 
-    def destroy(self):
+    def destroy(self) -> None:
         self.__canvas.delete(self.__id)

@@ -1,154 +1,135 @@
 from Base.rect import Rect
-from Base.interactable import Interactable
-from abc import ABC, abstractmethod
-class Enemy(Interactable): #this is supposed to be abc
-    def __init__(self, canva, name, x1, y1, width, height, health, speed, color): 
-        '''add armor, buff later
-        health = damage'''
+from Base.Entity import Entity
+
+class Enemy(Entity): 
+    def __init__(self, canva, name: str, x1: int, y1: int, width: int, height: int, health: int, speed: int, color:str) -> None: 
+        '''The physical enemy attacking the base'''
         super().__init__(Rect(canva, x1, y1, width, height, color))
         self.__name=name
+        self.__color=color
         self.__reward=health
         self.__initial_health=health
         self.__initial_speed=speed
         self.__health=health
         self.__speed=speed
         self.__progress=0
+        # === id of the next coordinate as the map is made of multiple paths===
         self.__distance_covered=0
+        # === how far enemies have travelled ===
 
-        '''Debuff'''
-        self.__freeze=0
-        self.__freeze_level=0
+        # === Debuff ===
+        self.__freeze=0 #Freeze duration
+        self.__freeze_level=0 # How much enemy is slowed down
+        
+        self.__burn=0 # Burn duration
+        self.__burn_damage=0 # How is much damage burn effect apply per tick
 
-        self.__burn=0
-        self.__burn_damage=0
-
-        self.__stun=0
-
-        self.__debuff=[]
-        '''Buff and debuff is given during gameplay, not at spawn'''
-
-        '''self.__progress is the index of the item in a list of path,
-        each index point to a pair of x,y (corners)'''
+        self.__stun=0 # Stun duration
 
     @property
-    def initial_health(self):
-        return self.__inital_health
+    def initial_health(self) -> int:
+        return self.__initial_health
 
     @property
-    def freeze(self):
+    def stun(self) -> int | float:
+        return self.__stun
+    
+    
+    # ======
+    @property
+    def freeze(self) -> int | float:
         return self.__freeze
     @freeze.setter
-    def freeze(self, value):
+    def freeze(self, value: int | float) -> None:
         if isinstance(value, (int, float)):
             self.__freeze=value
 
     @property
-    def freeze_level(self):
+    def freeze_level(self) -> int:
         return self.__freeze_level
     @freeze_level.setter
-    def freeze_level(self, value):
+    def freeze_level(self, value: int) -> None:
         if isinstance(value, int):
             self.__freeze_level=min(4,value)
 
+    # ======
     @property
-    def burn(self):
+    def burn(self) -> int | float:
         return self.__burn
     @burn.setter
-    def burn(self, value):
-        if isinstance(value, [int, float]):
+    def burn(self, value: int | float) -> None:
+        if isinstance(value, (int, float)):
             self.__burn=value
 
     @property
-    def burn_damage(self):
+    def burn_damage(self) -> int | float:
         return self.__burn_damage
     @burn_damage.setter
-    def burn_damage(self,value):
+    def burn_damage(self,value: int | float) -> None:
         if isinstance(value, (float, int)):
             self.__burn_damage=value
+    # ======
 
     @property
-    def stun(self):
-        return self.__stun
-    @stun.setter
-    def stun(self, value):
-        if isinstance(value, [int, float]):
-            self.__stun=value
-
-    @property
-    def name(self):
+    def name(self) -> str:
         return self.__name
 
     @property
-    def reward(self):
+    def reward(self) -> int:
         return self.__reward
     
+    #=====
     @property
-    def health(self):
+    def health(self) -> int | float:
         return self.__health
-    
-    @property
-    def speed(self):
-        return self.__speed
-
-    @property
-    def color(self):
-        return self.__color
-
-    @property
-    def progress(self):
-        return self.__progress
-
-    @property
-    def buff(self):
-        return self.__buff
-
-    @buff.setter
-    def buff(self, value):
-        self.__buff=value
-
-    @property
-    def debuff(self):
-        return self.__debuff
-
-    @debuff.setter
-    def debuff(self, value):
-        self.__debuff=value
-    
-    @progress.setter
-    def progress(self, value):
-        if isinstance(value, int):
-            self.__progress=value
-
-    @property
-    def distance_covered(self):
-        return self.__distance_covered
-    
-    @distance_covered.setter
-    def distance_covered(self, value):
-        if isinstance(value, [int, float]):
-            self.__distance_covered=value
-
-
     @health.setter
-    def health(self,value):
+    def health(self,value: int | float) -> None:
         if isinstance(value, int):
             self.__health=value
 
+    #=====
+    @property
+    def speed(self) -> int | float:
+        return self.__speed
     @speed.setter
-    def speed(self, value):
-        if isinstance(value, int):
+    def speed(self, value: int | float) -> None:
+        if isinstance(value, (int, float)):
             self.__speed=value
-
+    #=====
+    @property
+    def color(self) -> str:
+        return self.__color
     @color.setter
-    def color(self, value):
+    def color(self, value: str) -> None:
         if isinstance(value, str):
             self.__color=value
+    #======
+    @property
+    def progress(self) -> int:
+        return self.__progress
+    @progress.setter
+    def progress(self, value: int) -> int:
+        if isinstance(value, int):
+            self.__progress=value
 
+    #=====
+    @property
+    def distance_covered(self) -> int:
+        return self.__distance_covered
+    
+    @distance_covered.setter
+    def distance_covered(self, value: int) -> None:
+        if isinstance(value, (int, float)):
+            self.__distance_covered=value
+    #=====
 
-    def move(self, canva, x, y, delta_time):
+    def move(self, canva, x: int, y: int, delta_time: int | float) -> bool:
+        '''Moving enemies along the path to base'''
+
         x_reach=True
         y_reach=True
         if self.rect.cord_x!=x:
+            # === If has reached horizontally ===
             di=1 if self.rect.cord_x<x else -1
 
             x_after_move=self.rect.cord_x+di*self.__speed * delta_time
@@ -162,6 +143,7 @@ class Enemy(Interactable): #this is supposed to be abc
                 canva.move(self.rect.rect_id, di*self.__speed * delta_time, 0)
                 x_reach=False
         if self.rect.cord_y!=y:
+            # === If has reach vertically ===
             di=1 if self.rect.cord_y<y else -1
 
             y_after_move=self.rect.cord_y+di*self.__speed * delta_time
@@ -174,14 +156,18 @@ class Enemy(Interactable): #this is supposed to be abc
                 self.rect.y1+=di*self.__speed * delta_time
                 canva.move(self.rect.rect_id, 0, di*self.__speed * delta_time)
                 y_reach=False
+        # === If both are true, enemy has reach it's destination ===
         return x_reach and y_reach
 
-    def process_debuff(self, delta_time):
+    def process_debuff(self, delta_time: int | float) -> None:
+        # === Apply debuff's effect onto enemy's stats ===
         if self.__burn!=0:
+            # === Tick damage ===
             self.__health-=self.__burn_damage
             self.__burn=max(0, self.__burn-delta_time)
 
         if self.__freeze!=0:
+            # === Slow and stun ===
             if self.__freeze_level in [1,2,3]:
                 self.__speed-=(self.__speed*20*self.__freeze_level)/100
                 self.__freeze=max(0, self.__freeze-delta_time)
@@ -191,14 +177,18 @@ class Enemy(Interactable): #this is supposed to be abc
                 self.__freeze=0
 
         if self.__stun!=0:
+            # === Stop enemy movement ===
             self.__speed=0
             self.__stun=max(0, self.__stun-delta_time)
+
         if self.__stun==0 and self.__freeze==0:
+            # === Enemy recovery and stats recover to default ===
             self.__speed=self.__initial_speed
         
 
 class Enemy_Info:
-    def __init__(self, name, health, speed, color, width, height):
+    '''Information cards for enemy, Enemy Manager class uses Enemy_Info to create Enemy '''
+    def __init__(self, name: str, health: int, speed: int, color:str, width: int, height: ibt) -> None:
         self.__name=name
         self.__health=health
         self.__speed=speed
@@ -207,25 +197,25 @@ class Enemy_Info:
         self.__height=height
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self.__name
 
     @property
-    def health(self):
+    def health(self) -> int | float:
         return self.__health
     @property
-    def speed(self):
+    def speed(self) -> int | float:
         return self.__speed
 
     @property
-    def color(self):
+    def color(self) -> str:
         return self.__color
 
     @property
-    def width(self):
+    def width(self) -> int:
         return self.__width
     
     @property
-    def height(self):
+    def height(self) -> int:
         return self.__height
 

@@ -3,6 +3,7 @@ from Base.module_tower import TowerInfo, Tower, EffectType, DpsStats, DebuffStat
 from Base.module_tower import DpsTower, DebuffTower, Farm
 from abc import ABC, abstractmethod
 class Dictionary(ABC):
+    '''Quite self-explanatory huh'''
     def __init__(self):
         self.__dictionary={}
 
@@ -15,21 +16,26 @@ class Dictionary(ABC):
         pass
 
     def get(self, key):
+        ''' Retrieve the requested item'''
         return self.__dictionary[key]
     
 class Enemy_Dictionary(Dictionary):
+    '''Contains all enemy information'''
     def __init__(self):
         super().__init__()
 
     def add(self, name, key, health, speed, color, width, height):
+        '''Create and add a new enemy to the dictionary'''
         item=Enemy_Info(name, health, speed, color, width, height)
         self.dictionary[key]=item
 
 class Tower_Dictionary(Dictionary):
+    '''Contains all tower information'''
     def __init__(self):
         super().__init__()
 
     def add(self, type, key, name, cost, color, act_range, size, dps=None, debuff=None, support=None, income=None):
+        '''Create and add a new tower to the dictionary'''
         if type == "dps":
             item=TowerInfo(name, cost, color, act_range, size, dps)
         elif type == "debuff":
@@ -39,11 +45,13 @@ class Tower_Dictionary(Dictionary):
         self.dictionary[key]=[type,item]
 
     def get(self,key):
+        ''' Retrieve the request tower'''
         packet=super().get(key)
         return packet[1]
 
 
     def summon_tower(self, key, rect):
+        '''Summon the requested tower'''
         tower_type=self.dictionary[key][0]
         tower_info=self.dictionary[key][1]
 

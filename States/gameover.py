@@ -1,12 +1,12 @@
 from Base.button import Button
 from Head.states import GameState
 from Manager.collision import CollisionManager
-
+import tkinter as tk
 
 class GameOverState(GameState):
     '''Show a result overlay with menu and restart actions.'''
 
-    def __init__(self, window, title, include_resume=False):
+    def __init__(self, window: tk.Tk, title: str, include_resume=False) -> None:
         super().__init__(window)
         self.__canvas = self.window.canva
         width = self.window.window_width
@@ -20,29 +20,35 @@ class GameOverState(GameState):
             center_x + 250, center_y + panel_half_height,
             fill="white", outline="black", width=3, state="hidden"
         )
+        # === Title of the overlay menu ===
         self.__title = self.__canvas.create_text(
             center_x, center_y - 115, text=title, fill="black",
             font=("Arial", 30), state="hidden"
         )
+        # === Create a resume button if the menu needs it ===
         self.__resume_button = None
         if include_resume:
             self.__resume_button = Button(
                 self.__canvas, center_x, center_y - 35, 200, 60, "Resume"
             )
+
+        # === Create a return to main menu button ===s
         self.__menu_button = Button(
             self.__canvas, center_x, center_y + (25 if include_resume else 0),
             200, 60, "Main Menu"
         )
+        # === Create a restart game button ===
         self.__restart_button = Button(
             self.__canvas, center_x, center_y + (85 if include_resume else 65),
             200, 60, "Restart"
         )
-        self.__collision = CollisionManager()
 
+        # === Collision manager for checking button clicks 
+        self.__collision = CollisionManager()
         for item_id in self.__item_ids():
             self.__canvas.itemconfigure(item_id, state="hidden")
 
-    def enter(self):
+    def enter(self) -> None:
         for item_id in self.__item_ids():
             self.__canvas.itemconfigure(item_id, state="normal")
             self.__canvas.tag_raise(item_id)
@@ -51,12 +57,12 @@ class GameOverState(GameState):
             buttons.insert(0, self.__resume_button)
         self.__collision.interactive = buttons
 
-    def exit(self):
+    def exit(self) -> None:
         for item_id in self.__item_ids():
             self.__canvas.itemconfigure(item_id, state="hidden")
         self.__collision.interactive = []
 
-    def handle_click(self, event):
+    def handle_click(self, event: tk.Event) -> str:
         '''Check if user chose to resume, go to main menu or restart the game'''
         item = self.__collision.interactive_at(event.x, event.y)
         if item is None:
@@ -69,7 +75,8 @@ class GameOverState(GameState):
             return "restart"
         return None
 
-    def __item_ids(self):
+    def __item_ids(self) -> tuple | None:
+        '''A tuple that includes all the buttons of the menu'''
         item_ids = [
             self.__panel,
             self.__title,

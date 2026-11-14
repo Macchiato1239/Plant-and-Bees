@@ -1,7 +1,8 @@
 import time
 import tkinter as tk
+from typing import Callable
 from Head.states import GameState, State
-from Base.buildings import Buildings
+from Manager.buildings import Buildings
 from Manager.collision import CollisionManager
 from Manager.display import Display
 from Manager.enemymanager import EnemyManager
@@ -12,7 +13,7 @@ from Manager.towermanager import TowerManager
 
 class GameFlow(GameState):
     '''Create the game and coordinate its frame-by-frame flow.'''
-    def __init__(self, window, difficulty, finish_game):
+    def __init__(self, window: tk.Tk, difficulty: int, finish_game: Callable):
         super().__init__(window)
         self.__on_finish = finish_game
         canvas = self.window.canva
@@ -20,46 +21,57 @@ class GameFlow(GameState):
         self.__paused=False
         self.__disposed = False
         self.__after_id = None
+
+        # === Input events ===
         self.__key_binding_id = None
         self.__click_binding_id = None
         self.__motion_binding_id = None
 
+        # === Changable stats during the game flow ===
         self.__base_health = 100
         self.__starting_money = 750
         self.__money = self.__starting_money
         self.__paid_wave_count=0
 
+        # === Used to calculate delta time ===
         self.__last_time = time.time()
         self.__current_time = self.__last_time
 
+        # === Game play's properties managers
         self.__collision = CollisionManager()
         self.__buildings = Buildings(canvas, self.__base_health)
         self.__collision.taken.extend(
             [self.__buildings.spawn.rect, self.__buildings.base.rect]
         )
-        for path in self.__buildings.paths:
-            self.__collision.taken.append(path.rect)
-
         self.__hotbar = HotBarManager(canvas, self.__collision)
         self.__towers = TowerManager(canvas, self.__collision)
         self.__enemies = EnemyManager(canvas, difficulty, self.__buildings.spawn, self.__buildings.path_points)
+
+        # === Put the enemies' path into unplaceable place for towers ===
+        for path in self.__buildings.paths:
+            self.__collision.taken.append(path.rect)
+
+        # === Display manager, responsible for some of the game's UI: Cash, Wave number, base health, time til next wave, etc
         self.__display = Display(canvas, self.__money, self.__base_health, len(self.__enemies.game_info))
         self.__mouse_handler = MouseHandler(self)
 
-    def enter(self):
+    def enter(self) -> None:
+        '''Pause the game'''
         self.__paused = False
         self.__last_time = time.time()
 
-    def exit(self):
+    def exit(self) -> None:
+        '''Exit the pause state'''
         self.__paused = True
         self.__towers.cancel_selection()
 
-    def cleanup(self):
-        '''Stop this game flow and remove the canvas items it created.'''
+    def cleanup(self) -> None:
+        '''Stop the main game flow and remove the canvas items it created.'''
         if self.__disposed:
             return
         self.exit()
         self.__disposed = True
+        # === Mark the gameflow as being shut down ===
 
         if self.__after_id is not None:
             try:
@@ -67,12 +79,15 @@ class GameFlow(GameState):
             except tk.TclError:
                 pass
             self.__after_id = None
+            # === Delete the schedule callback to stop the game loop ===
 
+        # === Unbind every input events with its input functions ===
         bindings = (
             (self.window.window, "<KeyPress>", self.__key_binding_id),
             (self.window.window, "<Button-1>", self.__click_binding_id),
             (self.window.canva, "<Motion>", self.__motion_binding_id),
         )
+
         for widget, sequence, binding_id in bindings:
             if binding_id is not None:
                 widget.unbind(sequence, binding_id)
@@ -81,10 +96,11 @@ class GameFlow(GameState):
             if item_id not in self.__existing_canvas_items:
                 self.window.canva.delete(item_id)
 
+        # === Clear every collision detections ===
         self.__collision.interactive.clear()
         self.__collision.taken.clear()
 
-    def create_game_loop(self):
+    def create_game_loop(self) -> None:
         if self.__disposed:
             return
         # === Create slots ===
@@ -110,7 +126,7 @@ class GameFlow(GameState):
         # === Immediately trigger game loop ===
         self.game_loop()
 
-    def game_loop(self):
+    def game_loop(self) -> None:
         self.__after_id = None
         if self.__disposed:
             return
@@ -154,7 +170,7 @@ class GameFlow(GameState):
         # to process the next frame.
         self.__after_id = self.window.window.after(16, self.game_loop)
 
-    def handle_click(self, event):
+    def handle_click(self, event: tk.Event) -> None:
         '''Handling click inputs'''
         if self.__disposed or self.__paused:
             return
@@ -178,21 +194,25 @@ class GameFlow(GameState):
 
 
 
-    def handle_key(self, event):
+    def handle_key(self, event: tk.Event) -> None:
+        '''Handle keyboards input'''
         if event.keysym.lower() == "q":
             # === Stop selecting the selected tower ===
             self.__towers.cancel_selection()
         if event.keysym.lower() == "x":
+            # === Delete a tower ===
             self.__towers.delete_tower()
 
-    def update_range_display(self, event):
+    def update_range_display(self, event: tk.Event) -> None:
+        '''Update the property of the preview circle when a new tower is selected '''
         tower_info = self.__towers.selected_tower_info
         self.__display.show_range(event.x, event.y, tower_info)
 
-    def game_over_check(self):
+    def game_over_check(self) -> bool:
+        '''Check if the game is over, either winning or losing'''
         if self.__base_health <= 0:
-            # Clear placement mode before handing input over to the result
-            # overlay. This also resets the hotbar selection indicator.
+            #  === Clear placement mode before handing input over to the result overlay. 
+            # This also resets the hotbar selection indicator. ===
             self.__towers.cancel_selection()
             self.__on_finish(State.LOST)
             return True
