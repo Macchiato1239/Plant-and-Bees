@@ -162,11 +162,12 @@ def test_enemy_freeze_and_stun_restore_speed(canvas):
 
 def test_enemy_burn_damage_and_full_freeze_stun(canvas):
     enemy = Enemy(canvas, "Bee", 0, 0, 10, 10, 12, 10, "yellow")
-    enemy.burn = 0.5
+    enemy.burn = 2
     enemy.burn_damage = 3
-    enemy.process_debuff(0.2)
+    enemy.burn_tick = 0.5
+    enemy.process_debuff(0.6)
     assert enemy.health == 9
-    assert enemy.burn == pytest.approx(0.3)
+    assert enemy.burn == pytest.approx(1.4)
     enemy.freeze = 1
     enemy.freeze_level = 4
     enemy.process_debuff(0.1)
@@ -258,7 +259,7 @@ def test_tower_models_and_dictionary_summoning(canvas, monkeypatch):
 
 
 def test_dictionary_lookup_and_tower_configuration_errors(canvas, monkeypatch):
-    with pytest.raises(KeyError, match="Tower_Dictionary"):
+    with pytest.raises(KeyError, match="Unknown tower ID: 9999"):
         Tbook.get(9999)
     with pytest.raises(KeyError, match="Unknown tower ID"):
         Tbook.summon_tower(9999, Rect(canvas, 0, 0, 10, 10))

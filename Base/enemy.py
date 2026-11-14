@@ -24,6 +24,7 @@ class Enemy(Entity):
         self.__freeze_level=0
         self.__burn=0
         self.__burn_damage=0
+        self.__burn_tick=1
         self.__stun=0
 
     @property
@@ -68,6 +69,15 @@ class Enemy(Entity):
     def burn_damage(self,value: int | float) -> None:
         if isinstance(value, (float, int)):
             self.__burn_damage=value
+
+    @property
+    def burn_tick(self) -> int | float:
+        return self.__burn_tick
+
+    @burn_tick.setter
+    def burn_tick(self, value: int | float) -> None:
+        if isinstance(value, (int, float)) and value > 0:
+            self.__burn_tick=value
     # ======
 
     @property
@@ -165,8 +175,10 @@ class Enemy(Entity):
             raise TypeError("effect must be a StatusEffect")
         for active_effect in self.__effects:
             if active_effect.refresh_from(effect):
+                self.__sync_effect_properties()
                 return
         self.__effects.append(effect)
+        self.__sync_effect_properties()
 
     def update(self, delta_time: int | float, canvas, destination) -> bool:
         '''Update effects and movement; return whether the destination was reached.'''
@@ -179,6 +191,9 @@ class Enemy(Entity):
     def __update_effects(self, delta_time: int | float) -> None:
         self.__effects = [effect for effect in self.__effects
                           if not effect.update(self, delta_time)]
+        self.__sync_effect_properties()
+
+    def __sync_effect_properties(self) -> None:
         self.__freeze = max((effect.remaining for effect in self.__effects
                              if isinstance(effect, FreezeEffect) and effect.level < 4), default=0)
         self.__freeze_level = min(4, sum(effect.level for effect in self.__effects
@@ -187,6 +202,9 @@ class Enemy(Entity):
                            if isinstance(effect, BurnEffect)), default=0)
         self.__burn_damage = sum(effect.damage for effect in self.__effects
                                  if isinstance(effect, BurnEffect))
+        active_burns = [effect for effect in self.__effects
+                        if isinstance(effect, BurnEffect)]
+        self.__burn_tick = active_burns[0].tick if active_burns else 1
         self.__stun = max((effect.stun_remaining for effect in self.__effects
                            if isinstance(effect, FreezeEffect) and effect.level >= 4), default=0)
         multiplier = 1.0
@@ -203,14 +221,17 @@ class Enemy(Entity):
             self.apply_effect(FreezeEffect(self.__freeze, self.__freeze_level))
         # === Apply burn to self ===
         if self.__burn > 0 and not any(isinstance(effect, BurnEffect) for effect in self.__effects):
-            self.apply_effect(BurnEffect(self.__burn, self.__burn_damage))
+            self.apply_effect(BurnEffect(
+                self.__burn, self.__burn_damage, self.__burn_tick
+            ))
         self.__update_effects(delta_time)
 
     def add_freeze(self, duration: int | float, level: int | float) -> None:
         self.apply_effect(FreezeEffect(duration, level))
 
-    def add_burn(self, duration: int | float, damage: int | float) -> None:
-        self.apply_effect(BurnEffect(duration, damage))
+    def add_burn(self, duration: int | float, damage: int | float,
+                 tick: int | float = 1) -> None:
+        self.apply_effect(BurnEffect(duration, damage, tick))
         
 
 class Enemy_Info:

@@ -90,7 +90,7 @@ def test_display_text_and_range_visibility(canvas):
     display.show_range(10, 20, None)
     assert canvas.items[display.range_circle]["state"] == "hidden"
     display.show_range(10, 20, __import__("dictionary").Tbook.get(1))
-    assert canvas.items[display.range_circle]["coords"] == (-190, -180, 210, 220)
+    assert canvas.items[display.range_circle]["coords"] == (-140, -130, 160, 170)
     assert canvas.items[display.space_taken_rect]["state"] == "normal"
 
 

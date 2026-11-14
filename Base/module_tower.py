@@ -35,9 +35,20 @@ class DebuffStats:
     def apply_to(self, enemy) -> None:
         '''Create and attach an effect object to the target enemy.'''
         if self.type == EffectType.FROZEN:
-            enemy.apply_effect(FreezeEffect(self.duration, self.magnitude))
+            effect = FreezeEffect(self.duration, self.magnitude)
+            if hasattr(enemy, "apply_effect"):
+                enemy.apply_effect(effect)
+            else:
+                enemy.freeze = self.duration
+                enemy.freeze_level += self.magnitude
         elif self.type == EffectType.BURN:
-            enemy.apply_effect(BurnEffect(self.duration, self.magnitude, self.tick))
+            if hasattr(enemy, "apply_effect"):
+                enemy.apply_effect(BurnEffect(self.duration, self.magnitude, self.tick))
+            else:
+                enemy.burn = self.duration
+                enemy.burn_damage = self.magnitude
+                if hasattr(enemy, "burn_tick"):
+                    enemy.burn_tick = self.tick
 
 @dataclass(frozen=True)
 class IncomeStats:

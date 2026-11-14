@@ -59,7 +59,9 @@ class Tower_Dictionary(Dictionary):
         try:
             packet=super().get(key)
         except KeyError as error:
-            raise UnknownDefinitionError(f"Unknown tower ID: {key!r}") from error
+            raise UnknownDefinitionError(
+                f"(Unknown tower ID: {key!r})"
+            ) from error
         return packet[1]
 
 
