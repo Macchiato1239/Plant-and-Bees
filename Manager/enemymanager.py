@@ -2,12 +2,14 @@ import math
 
 from dictionary import Ebook
 from Base.enemy import Enemy
-from Manager.difficulty import diff
+from difficulty import diff
 
 class EnemyManager:
     '''Spawn waves and update enemy movement, effects, deaths, and base damage.'''
 
     def __init__(self, canvas, difficulty_level, spawn, path_points):
+        if not isinstance(difficulty_level, int):
+            raise TypeError("difficulty_level must be an integer from 1 to 3")
         self.__canvas = canvas
         self.__spawn = spawn
         self.__path_points = path_points
@@ -21,12 +23,14 @@ class EnemyManager:
         self.__time_til_next_wave = 3.0
         self.__time_since_last_wave = 0.0
         self.__waiting_for_next_wave = False
-        if difficulty_level==1:
-            self.__game_info=diff.get("normal")
-        elif difficulty_level==2:
-            self.__game_info=diff.get("hard")
-        elif difficulty_level==3:
-            self.__game_info=diff.get("insane")
+        modes = {1: "normal", 2: "hard", 3: "insane"}
+        try:
+            mode = modes[difficulty_level]
+        except KeyError as error:
+            raise ValueError(
+                "difficulty_level must be 1 (normal), 2 (hard), or 3 (insane)"
+            ) from error
+        self.__game_info = diff.get(mode)
 
         # ===A map containing enemy id, time before spawning the next enemy===
 
@@ -70,6 +74,10 @@ class EnemyManager:
         return f"Next wave in: {math.ceil(remaining)}s"
 
     def update(self, delta_time, canvas):
+        if not isinstance(delta_time, (int, float)):
+            raise TypeError("delta_time must be a number")
+        if delta_time < 0:
+            raise ValueError("delta_time cannot be negative")
         if self.__waiting_for_next_wave:
             self.__time_since_last_wave += delta_time
             if self.__time_since_last_wave >= self.__time_til_next_wave:
@@ -89,8 +97,22 @@ class EnemyManager:
             # === If there are still waves and unsummoned enemies ===
             if self.__time_since_last_spawn >= self.__time_til_next_spawn:
                 # === Enough time has passed to spawn the next enemy ===
-                enemy_id, delay = self.__game_info[self.__game_progress][self.__wave_progress]
-                self.spawn(Ebook.get(enemy_id))
+                try:
+                    enemy_id, delay = self.__game_info[self.__game_progress][self.__wave_progress]
+                except IndexError as error:
+                    raise IndexError(
+                        f"Wave data is missing wave {self.__game_progress + 1}, "
+                        f"spawn {self.__wave_progress + 1}"
+                    ) from error
+                except (TypeError, ValueError) as error:
+                    raise ValueError(
+                        "Each wave entry must contain an enemy ID and spawn delay"
+                    ) from error
+                try:
+                    enemy_info = Ebook.get(enemy_id)
+                except TypeError as error:
+                    raise TypeError("Wave enemy IDs must be hashable dictionary keys") from error
+                self.spawn(enemy_info)
                 self.__time_til_next_spawn = delay
                 self.__time_since_last_spawn = 0
 
@@ -114,8 +136,18 @@ class EnemyManager:
                 continue
             
 
-            destination = self.__path_points[current_enemy.progress]
-            reached = current_enemy.move(canvas, destination[0], destination[1], delta_time * 100)
+            try:
+                destination = self.__path_points[current_enemy.progress]
+                destination_x, destination_y = destination
+            except IndexError as error:
+                raise IndexError(
+                    f"Enemy path progress {current_enemy.progress} is outside the path"
+                ) from error
+            except (TypeError, ValueError) as error:
+                raise ValueError("Each path point must contain an x and y coordinate") from error
+            reached = current_enemy.move(
+                canvas, destination_x, destination_y, delta_time * 100
+            )
 
             # === Check if enemy reached a coordinate in the paths (corner or base) ===
             if reached:
@@ -144,12 +176,18 @@ class EnemyManager:
 
     def spawn(self, enemy_info):
         '''spawn enemy from given enemy information'''
-        width, height = enemy_info.width, enemy_info.height
+        try:
+            width, height = enemy_info.width, enemy_info.height
+            name, speed = enemy_info.name, enemy_info.speed
+            health, color = enemy_info.health, enemy_info.color
+        except AttributeError as error:
+            raise AttributeError(
+                "enemy_info must provide name, health, speed, color, width, and height"
+            ) from error
         x = self.__spawn.rect.cord_x - width / 2
         y = self.__spawn.rect.cord_y - height / 2
         spawned_enemy = Enemy(
-            self.__canvas, enemy_info.name, x, y, width, height,
-            enemy_info.health, enemy_info.speed, enemy_info.color,
+            self.__canvas, name, x, y, width, height, health, speed, color,
         )
         self.__active_enemies.append(spawned_enemy)
         return spawned_enemy

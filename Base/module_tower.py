@@ -1,4 +1,4 @@
-from Base.Entity import Entity
+from Base.entity import Entity
 import time
 from dataclasses import dataclass
 from abc import ABC, abstractmethod

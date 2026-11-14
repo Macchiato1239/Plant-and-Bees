@@ -1,5 +1,5 @@
 from Base.rect import Rect
-from Base.Entity import Entity
+from Base.entity import Entity
 
 class Spawn(Entity):
     '''Where enemy spawns'''

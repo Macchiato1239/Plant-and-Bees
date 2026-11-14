@@ -1,4 +1,4 @@
-from Base.Entity import Entity
+from Base.entity import Entity
 from Base.rect import Rect
 
 class Button(Entity):

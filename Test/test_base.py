@@ -20,6 +20,7 @@ from Base.module_tower import (
 from Base.projectile import Projectile
 from Base.rect import Rect
 from dictionary import Ebook, Tbook
+from dictionary import Dictionary, Tower_Dictionary
 
 
 def test_rect_geometry_mutation_and_drawing(canvas):
@@ -244,3 +245,24 @@ def test_tower_models_and_dictionary_summoning(canvas, monkeypatch):
     assert Tbook.summon_tower(1, Rect(canvas, 0, 0, 10, 10)).name == "soldier"
     assert Tbook.summon_tower(2, Rect(canvas, 0, 0, 10, 10)).name == "freezer"
     assert Tbook.summon_tower(4, Rect(canvas, 0, 0, 10, 10)).name == "farm"
+
+
+def test_dictionary_lookup_and_tower_configuration_errors(canvas, monkeypatch):
+    with pytest.raises(KeyError, match="Tower_Dictionary"):
+        Tbook.get(9999)
+    with pytest.raises(KeyError, match="Unknown tower ID"):
+        Tbook.summon_tower(9999, Rect(canvas, 0, 0, 10, 10))
+    with pytest.raises(TypeError, match="hashable"):
+        Ebook.get([])
+    with pytest.raises(ValueError, match="Unsupported tower type"):
+        Tbook.add("unknown", 999, "bad", 1, "red", 1, 1)
+
+    monkeypatch.setitem(Tbook.dictionary, 998, ["dps", object()])
+    with pytest.raises(AttributeError, match="missing stats"):
+        Tbook.summon_tower(998, Rect(canvas, 0, 0, 10, 10))
+    monkeypatch.setitem(Tbook.dictionary, 997, ["unknown", None])
+    with pytest.raises(ValueError, match="unsupported type"):
+        Tbook.summon_tower(997, Rect(canvas, 0, 0, 10, 10))
+
+    with pytest.raises(TypeError):
+        Dictionary.get(Ebook, [])

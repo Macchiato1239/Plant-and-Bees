@@ -1,4 +1,7 @@
 from types import SimpleNamespace
+import builtins
+import runpy
+from pathlib import Path
 
 import pytest
 from conftest import FakeCanvas, FakeWidget
@@ -336,3 +339,17 @@ def test_abstract_base_methods_are_defined_as_noops(window):
 
     from dictionary import Dictionary
     assert Dictionary.add() is None
+
+
+def test_main_reports_missing_project_import(monkeypatch):
+    original_import = builtins.__import__
+
+    def fail_game_import(name, *args, **kwargs):
+        if name == "Head.game":
+            raise ModuleNotFoundError("missing game module", name="Head.game")
+        return original_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", fail_game_import)
+    entrypoint = Path(__file__).resolve().parents[1] / "main.py"
+    with pytest.raises(SystemExit, match="could not be imported"):
+        runpy.run_path(str(entrypoint), run_name="__main__")

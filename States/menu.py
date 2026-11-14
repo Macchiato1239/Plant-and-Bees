@@ -1,4 +1,4 @@
-from Head.states import GameState
+from States.states import GameState
 from Manager.collision import CollisionManager
 from Base.button import Button
 class MenuState(GameState):

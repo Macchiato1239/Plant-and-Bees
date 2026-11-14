@@ -1,5 +1,5 @@
 from Base.rect import Rect
-from Base.Entity import Entity
+from Base.entity import Entity
 
 class Enemy(Entity): 
     def __init__(self, canva, name: str, x1: int, y1: int, width: int, height: int, health: int, speed: int, color:str) -> None: 

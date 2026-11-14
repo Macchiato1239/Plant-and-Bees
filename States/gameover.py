@@ -1,5 +1,5 @@
 from Base.button import Button
-from Head.states import GameState
+from States.states import GameState
 from Manager.collision import CollisionManager
 import tkinter as tk
 

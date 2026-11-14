@@ -44,6 +44,10 @@ class TowerManager:
     def select_tower_card(self, tower_id):
         '''Select a tower to place'''
         if isinstance(tower_id, int):
+            try:
+                Tbook.get(tower_id)
+            except KeyError:
+                return
             self.__current_tower = tower_id
             # === Signaling a tower has been selected ===
             self.__current_tower_signal.change_color("green")
@@ -55,6 +59,8 @@ class TowerManager:
 
     def place_tower(self, cord_x, cord_y, money):
         '''Creating a tower object using the current selected tower's info'''
+        if not all(isinstance(value, (int, float)) for value in (cord_x, cord_y, money)):
+            raise TypeError("tower coordinates and money must be numeric")
         if self.__current_tower is None:
             # === Check if a tower is selected ===
             return False, money
@@ -116,7 +122,7 @@ class TowerManager:
         tower.delete()
 
     def update(self, enemies, collision, delta_time):
-        ''''''
+        '''Update enemy behaviors, stats, and process debuff'''
         for projectile in self.__projectiles[:]:
             if projectile.update(delta_time):
                 projectile.destroy()
@@ -138,16 +144,19 @@ class TowerManager:
             if target == 0:
             # === None in range ===
                 continue
+
+            # === Create projectiles ===
             start = (tower.rect.cord_x, tower.rect.cord_y)
             destination = (target.rect.cord_x, target.rect.cord_y)
             self.__projectiles.append(
                 Projectile(self.__canvas, start, destination)
             )
             target.health -= damage
-            if isinstance(tower, DebuffTower) and tower.type == EffectType.FROZEN:
-                # === Apply freeze debuff ===
-                target.freeze = tower.duration
-                target.freeze_level += tower.magnitude
+            if isinstance(tower, DebuffTower):
+                if tower.type == EffectType.FROZEN:
+                    # === Apply freeze debuff ===
+                    target.freeze = tower.duration
+                    target.freeze_level += tower.magnitude
 
     @staticmethod
     def __enemy_sorter(enemies):

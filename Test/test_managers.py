@@ -127,6 +127,12 @@ def test_tower_selection_placement_validation_and_deletion(tower_setup):
     assert manager.selected_tower_info is None
     assert manager.place_tower(100, 100, 1000) == (False, 1000)
     manager.select_tower_card(1)
+    manager.cancel_selection()
+    manager.select_tower_card(9999)
+    assert manager.current_tower is None
+    with pytest.raises(TypeError, match="numeric"):
+        manager.place_tower("x", 100, 1000)
+    manager.select_tower_card(1)
     assert manager.selected_tower_info.name == "soldier"
     manager.investigate_tower(SimpleNamespace(x=100, y=100))
     assert manager.place_tower(100, 100, 10) == (False, 10)
@@ -265,4 +271,61 @@ def test_enemy_manager_spawns_multiple_enemies_in_wave(canvas, monkeypatch):
         enemy.health = 0
     assert manager.update(0, canvas) == rewards
     assert manager.is_complete
+
+
+def test_enemy_manager_rejects_bad_difficulty_and_delta(canvas):
+    spawn = Spawn(canvas, 0, 0)
+    with pytest.raises(TypeError, match="difficulty_level"):
+        EnemyManager(canvas, "hard", spawn, [(0, 0)])
+    with pytest.raises(ValueError, match=r"1 \(normal\)"):
+        EnemyManager(canvas, 9, spawn, [(0, 0)])
+    manager = EnemyManager(canvas, 1, spawn, [(0, 0)])
+    with pytest.raises(TypeError, match="delta_time"):
+        manager.update("fast", canvas)
+    with pytest.raises(ValueError, match="negative"):
+        manager.update(-1, canvas)
+
+
+def test_enemy_manager_reports_malformed_wave_enemy_and_path_data(canvas, monkeypatch):
+    spawn = Spawn(canvas, 0, 0)
+
+    monkeypatch.setattr(diff, "get", lambda key: [[[1]]])
+    malformed_wave = EnemyManager(canvas, 1, spawn, [(0, 0)])
+    with pytest.raises(ValueError, match="wave entry"):
+        malformed_wave.update(0, canvas)
+
+    monkeypatch.setattr(diff, "get", lambda key: [[[999, 0]]])
+    unknown_enemy = EnemyManager(canvas, 1, spawn, [(0, 0)])
+    with pytest.raises(KeyError, match="Enemy_Dictionary"):
+        unknown_enemy.update(0, canvas)
+
+    monkeypatch.setattr(diff, "get", lambda key: [[ [[], 0] ]])
+    invalid_enemy_key = EnemyManager(canvas, 1, spawn, [(0, 0)])
+    with pytest.raises(TypeError, match="hashable"):
+        invalid_enemy_key.update(0, canvas)
+
+    monkeypatch.setattr(diff, "get", lambda key: [[[1, 0]]])
+    bad_index = EnemyManager(canvas, 1, spawn, [(0, 0)])
+    bad_index._EnemyManager__wave_progress = 2
+    with pytest.raises(IndexError, match="Wave data"):
+        bad_index.update(0, canvas)
+
+    bad_path = EnemyManager(canvas, 1, spawn, [(0, 0)])
+    bad_path._EnemyManager__game_progress = -1
+    bad_path.active_enemies.append(SimpleNamespace(
+        progress=5, health=10, process_debuff=lambda dt: None
+    ))
+    with pytest.raises(IndexError, match="path progress"):
+        bad_path.update(0, canvas)
+
+    malformed_path = EnemyManager(canvas, 1, spawn, [(0,)])
+    malformed_path._EnemyManager__game_progress = -1
+    malformed_path.active_enemies.append(SimpleNamespace(
+        progress=0, health=10, process_debuff=lambda dt: None
+    ))
+    with pytest.raises(ValueError, match="path point"):
+        malformed_path.update(0, canvas)
+
+    with pytest.raises(AttributeError, match="enemy_info"):
+        bad_path.spawn(object())
 

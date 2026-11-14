@@ -1,5 +1,5 @@
 from Head.module_window import Window
-from Head.states import State
+from States.states import State
 from States.gameflow import GameFlow
 from States.pause import PausedState
 from States.menu import MenuState

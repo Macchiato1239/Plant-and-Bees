@@ -1,7 +1,7 @@
 import time
 import tkinter as tk
 from typing import Callable
-from Head.states import GameState, State
+from States.states import GameState, State
 from Manager.buildings import Buildings
 from Manager.collision import CollisionManager
 from Manager.display import Display
